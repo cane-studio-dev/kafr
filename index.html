@@ -95,7 +95,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);text-a
 
 <div id="loginModal" class="modal"><div class="modalbox"><div class="topline"><h2 id="loginTitle"></h2><button class="ghost" onclick="closeModal()">×</button></div>
 <label id="nameLabel"></label><select id="teacherSelect" class="hidden"></select><input id="loginName" class="hidden">
-<label id="emailLabel">البريد الإلكتروني</label><input id="loginEmail" type="email" autocomplete="email" placeholder="name@example.com">
+<label id="emailLabel" class="hidden">البريد الإلكتروني</label><input id="loginEmail" type="email" autocomplete="email" placeholder="name@example.com" class="hidden">
 <label data-i18n="password">كلمة المرور</label><input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••">
 <p id="loginError" style="color:#b91c1c"></p><div class="row"><button class="primary" id="loginButton" onclick="login()" data-i18n="login">دخول</button><button class="ghost" id="signupButton" onclick="openSignup()" data-i18n="signup">إنشاء حساب جديد</button></div>
 <p class="muted" id="authHint" style="font-size:12px">الحسابات والبيانات محفوظة الآن في قاعدة بيانات المنصة.</p></div></div>
@@ -105,7 +105,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);text-a
 <label>الاسم</label><input id="signupName" placeholder="اكتب اسمك">
 <label>كلمة المرور</label><input id="signupPass" type="password" placeholder="اختر كلمة مرور">
 <p id="signupError" style="color:#b91c1c"></p><button class="primary" onclick="signup()">إنشاء الحساب</button>
-<p class="muted" style="font-size:12px">المدرس لا يستطيع إنشاء حساب مدرس إلا إذا كان اسمه ضمن قائمة المدرسين المعتمدين.</p></div></div>
+<p class="muted" style="font-size:12px">المدرس يتحقق النظام من اسمه تلقائياً داخل قاعدة البيانات.</p></div></div>
 
 <div id="examModal" class="modal"><div class="modalbox"><div class="topline"><h2 id="runTitle"></h2><span class="timer" id="timer"></span></div><div id="runQuestions"></div><button class="primary" onclick="submitExam()" data-i18n="finish">إنهاء الامتحان</button><div id="examResult"></div></div></div>
 
@@ -185,10 +185,15 @@ async function signup(){
     err.textContent=lang==="ar"?"اكتب الاسم وكلمة مرور من 6 أحرف أو أكثر.":"Enter a name and a password of at least 6 characters.";
     return;
   }
-  if(role==="teacher" && !teachers.some(t=>t.name===name)){
-    err.textContent=lang==="ar"?"اسم المدرس غير موجود في قائمة المدرسين المعتمدين.":"This teacher name is not on the approved list.";
-    return;
+  
+  if(role==="teacher"){
+    const {data:approved}=await supabaseClient.from("approved_teachers").select("full_name").eq("full_name",name).maybeSingle();
+    if(!approved){
+      err.textContent=lang==="ar"?"اسم المدرس غير موجود في قائمة المدرسين المعتمدين بقاعدة البيانات.":"This teacher name is not on the approved list in the database.";
+      return;
+    }
   }
+
   const {data:existing}=await supabaseClient.from("profiles").select("id").eq("full_name",name).limit(1);
   if(existing && existing.length){
     err.textContent=lang==="ar"?"هذا الاسم مسجل بالفعل. استخدم اسمًا مختلفًا أو سجّل الدخول.":"This name is already registered. Use another name or log in.";
@@ -203,12 +208,17 @@ async function signup(){
     err.textContent=error.message;
     return;
   }
-  if(data.session){
-    alert(lang==="ar"?"تم إنشاء الحساب. يمكنك الدخول الآن باسمك وكلمة المرور.":"Account created. You can log in now.");
-    closeModal();
-    return;
+  if(data.user){
+    const {error:profileError}=await supabaseClient.from("profiles").upsert({
+      id:data.user.id,
+      full_name:name,
+      role
+    },{onConflict:"id"});
+    if(profileError){
+      console.warn("Profile creation failed:",profileError.message);
+    }
   }
-  alert(lang==="ar"?"تم إنشاء الحساب. إذا طلبت Supabase تأكيد البريد، نحتاج تعطيل تأكيد البريد من إعدادات Auth حتى يعمل الدخول بالاسم مباشرة.":"Account created. If Supabase asks for email confirmation, disable email confirmation in Auth settings so name/password login works directly.");
+  alert(lang==="ar"?"تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول الآن.":"Account created successfully! You can log in now.");
   closeModal();
 }
 
@@ -224,7 +234,12 @@ async function login(){
     return;
   }
   const {data:profile,error:lookupError}=await supabaseClient.from("profiles").select("*").eq("full_name",name).eq("role",loginRole).maybeSingle();
-  if(lookupError||!profile){
+  if(lookupError){
+    err.textContent=lang==="ar"?"تعذر الاتصال بقاعدة البيانات. حاول مرة أخرى.":"Could not connect to the database. Try again.";
+    console.error(lookupError);
+    return;
+  }
+  if(!profile){
     err.textContent=lang==="ar"?"الحساب غير موجود. أنشئ حسابًا أولاً.":"Account not found. Create an account first.";
     return;
   }
@@ -453,6 +468,13 @@ async function init(){
 
 supabaseClient.auth.onAuthStateChange(async (_event,session)=>{
   if(!session){currentUser=null;return;}
+});
+
+window.addEventListener("unhandledrejection",event=>{
+  console.error("Unhandled application error:",event.reason);
+});
+window.addEventListener("error",event=>{
+  console.error("Application error:",event.error||event.message);
 });
 
 init();

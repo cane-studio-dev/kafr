@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<title>منصة كفر الحمادية / Kafr El Hamadya Platform</title>
+<meta name="description" content="Kafr El Hamadya Platform - Educational exams, posts, messages and subscriptions.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23111827'/%3E%3Ctext x='32' y='41' text-anchor='middle' font-family='Arial' font-size='28' font-weight='700' fill='white'%3EKH%3C/text%3E%3C/svg%3E">
+<style>
+:root{--ink:#111827;--muted:#6b7280;--line:#e5e7eb;--soft:#f8fafc;--brand:#111827;--ok:#15803d;--danger:#b91c1c}
+*{box-sizing:border-box}body{margin:0;font-family:Tahoma,Arial,sans-serif;color:var(--ink);background:#fff}
+button,input,textarea,select{font:inherit}button{cursor:pointer}.container{max-width:1180px;margin:auto;padding:0 20px}
+header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav{height:72px;display:flex;align-items:center;gap:14px}.logo{display:flex;align-items:center;gap:10px;margin-inline-end:auto}
+.logo-mark{width:44px;height:44px;border-radius:13px;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:800;letter-spacing:-1px}
+.logo b{display:block;font-size:16px}.logo small{color:var(--muted)}
+.lang button,.ghost,.primary,.danger,.card button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 13px}
+.lang button.active,.primary{background:var(--ink);color:#fff;border-color:var(--ink)}.primary{padding:11px 16px}.danger{color:#fff;background:#b91c1c;border-color:#b91c1c}
+.hero{padding:70px 0 45px;background:linear-gradient(180deg,#f8fafc,white)}
+.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:35px;align-items:center}.badge{display:inline-block;background:#eef2ff;border:1px solid #e0e7ff;border-radius:999px;padding:7px 12px;font-size:13px}
+h1{font-size:clamp(34px,5vw,60px);line-height:1.08;margin:18px 0}h2{margin-top:0}.hero p{font-size:18px;color:var(--muted);line-height:1.8}
+.panel,.card{border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:0 8px 30px rgba(17,24,39,.05)}.panel{padding:24px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}.stat{padding:18px;border:1px solid var(--line);border-radius:14px}.stat b{font-size:24px}.stat span{display:block;color:var(--muted);font-size:13px;margin-top:5px}
+section{padding:48px 0}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{padding:20px}.card h3{margin-top:0}.muted{color:var(--muted)}.hidden{display:none!important}
+.dashboard{background:var(--soft);min-height:600px}.topline{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:20px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+label{display:block;font-size:13px;font-weight:700;margin:10px 0 6px}input,textarea,select{width:100%;border:1px solid #d1d5db;border-radius:10px;padding:11px;background:#fff}textarea{min-height:100px;resize:vertical}.row{display:flex;gap:10px;flex-wrap:wrap}.list{display:grid;gap:10px}.item{padding:14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.modal{position:fixed;inset:0;background:rgba(17,24,39,.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}.modal.show{display:flex}.modalbox{width:min(560px,100%);background:#fff;border-radius:18px;padding:24px;max-height:90vh;overflow:auto}
+.q{padding:14px;border:1px solid var(--line);border-radius:12px;margin:12px 0}.option{display:flex;gap:8px;align-items:center;margin:7px 0}.option input{width:auto}.timer{font-weight:800;font-size:20px}.result{padding:14px;border-radius:12px;background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
+footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);text-align:center}
+@media(max-width:800px){.hero-grid,.grid2,.cards{grid-template-columns:1fr}.nav{height:auto;padding:12px 0;flex-wrap:wrap}.logo{margin-inline-end:0}.stats{grid-template-columns:1fr 1fr}.hero{padding-top:40px}}
+</style>
+</head>
+<body>
+<header><div class="container nav">
+  <div class="logo"><div class="logo-mark">KH</div><div><b data-i18n="brand">منصة كفر الحمادية</b><small>Kafr El Hamadya Platform</small><small style="display:block;margin-top:3px;font-weight:700">Executed by Marwan DEV</small></div></div>
+  <div class="lang"><button id="arBtn" class="active" onclick="setLang('ar')">AR</button><button id="enBtn" onclick="setLang('en')">EN</button></div>
+  <button class="ghost" onclick="installApp()" data-i18n="install">تحميل التطبيق</button>
+  <button class="ghost" onclick="openLogin('teacher')" data-i18n="teacherLogin">دخول كـ مدرس</button>
+  <button class="primary" onclick="openLogin('student')" data-i18n="studentLogin">دخول كـ طالب</button>
+</div></header>
+
+<main id="home">
+<section class="hero"><div class="container hero-grid">
+<div><span class="badge" data-i18n="badge">تعليم • اختبارات • تواصل</span>
+<h1 data-i18n="heroTitle">تعلم بذكاء، واختبر نفسك بثقة.</h1>
+<p data-i18n="heroText">منصة تعليمية متكاملة لإدارة الاختبارات والبوستات والتواصل بين المدرس والطالب، بواجهة بسيطة وسريعة.</p>
+<div class="row"><button class="primary" onclick="openLogin('student')" data-i18n="startStudent">ابدأ كطالب</button><button class="ghost" onclick="openLogin('teacher')" data-i18n="startTeacher">لوحة المدرس</button></div>
+<div class="stats"><div class="stat"><b>7</b><span data-i18n="teachers">مدرسون معتمدون</span></div><div class="stat"><b>∞</b><span data-i18n="local">تعلم وتواصل</span></div><div class="stat"><b>24/7</b><span data-i18n="fast">سريع وخفيف</span></div></div>
+</div>
+<div class="panel"><h2 data-i18n="features">مميزات المنصة</h2><div class="list">
+<div class="item">⏱️ <b data-i18n="f1">اختبارات بوقت وعدّاد تنازلي</b></div>
+<div class="item">📝 <b data-i18n="f2">أسئلة واختيارات ونتيجة فورية</b></div>
+<div class="item">💬 <b data-i18n="f3">رسائل خاصة بين الطالب والمدرس</b></div>
+<div class="item">📢 <b data-i18n="f4">نشر بوستات وإعلانات تعليمية</b></div>
+</div></div>
+</div></section>
+
+<section><div class="container"><h2>نظام الباقات والتفعيل</h2>
+<div class="cards">
+<div class="card"><h3>الأساسية</h3><p class="muted">حتى 2 امتحان شهريًا.</p></div>
+<div class="card"><h3>المتوسطة</h3><p class="muted">حتى 3 امتحانات شهريًا.</p></div>
+<div class="card"><h3>المتقدمة</h3><p class="muted">حد أعلى للاستخدام، ويُحدد التفعيل من الإدارة.</p></div>
+</div>
+<p class="muted" style="margin-top:18px">نظام اشتراكات مرن لإدارة الباقات وتفعيل الحسابات وتنظيم الامتحانات.</p>
+<h2 data-i18n="upgradeTitle">الاشتراكات والترقية</h2><p class="muted" data-i18n="upgradeText">لتفعيل الحسابات أو الترقية، استخدم محفظة الدعم:</p><div class="panel"><b style="font-size:24px">01221599078</b><p class="muted" data-i18n="upgradeNote">بعد التحويل، تواصل مع الدعم لتأكيد التفعيل. لا تُدخل بيانات الدفع داخل هذه الصفحة.</p></div></div></section>
+
+<section id="dashboard" class="dashboard hidden"><div class="container">
+<div class="topline"><div><h2 id="dashTitle"></h2><p class="muted" id="dashSub"></p></div><button class="ghost" onclick="logout()" data-i18n="logout">تسجيل الخروج</button></div>
+<div id="teacherDash" class="hidden">
+<div class="cards" style="margin-bottom:18px">
+<div class="card"><h3>📊 باقتي الحالية</h3><div id="planInfo" class="muted"></div></div>
+<div class="card"><h3>📅 الامتحانات هذا الشهر</h3><div id="monthlyExamInfo" class="muted"></div></div>
+<div class="card"><h3>💳 الترقية</h3><div class="muted">لزيادة عدد الامتحانات أو تفعيل باقة، تواصل مع الدعم على <b>01221599078</b>.</div></div>
+</div>
+<div class="grid2">
+<div class="card"><h3 data-i18n="newExam">إنشاء امتحان تفاعلي</h3>
+<label data-i18n="examTitle">عنوان الامتحان</label><input id="examTitle">
+<label data-i18n="duration">المدة بالدقائق</label><input id="duration" type="number" min="1" value="10">
+<label>الباقة / الحد الشهري</label>
+<select id="planSelect"><option value="2">أساسية — 2 امتحان/شهر</option><option value="3">متوسطة — 3 امتحانات/شهر</option><option value="30">يومية/متقدمة — حتى 30 امتحانًا/شهر</option></select>
+<div id="questions"></div><button class="ghost" onclick="addQuestion()" data-i18n="addQuestion">+ إضافة سؤال</button>
+<button class="primary" onclick="saveExam()" data-i18n="publishExam">حفظ الامتحان</button></div>
+<div class="card"><h3 data-i18n="newPost">نشر بوست</h3><textarea id="postText" placeholder="اكتب إعلاناً أو معلومة تعليمية..."></textarea><button class="primary" onclick="publishPost()" data-i18n="publish">نشر</button>
+<h3 data-i18n="myPosts">البوستات</h3><div id="teacherPosts" class="list"></div></div></div>
+<div class="card" style="margin-top:18px"><h3 data-i18n="messages">رسائل الطلاب</h3><div id="teacherMessages" class="list"></div></div></div>
+
+<div id="studentDash" class="hidden"><div class="grid2"><div class="card"><h3 data-i18n="posts">البوستات</h3><div id="studentPosts" class="list"></div></div>
+<div class="card"><h3 data-i18n="exams">الامتحانات</h3><div id="studentExams" class="list"></div></div></div>
+<div class="card" style="margin-top:18px"><h3 data-i18n="privateMsg">مراسلة المدرس</h3><label data-i18n="chooseTeacher">اختر المدرس</label><select id="msgTeacher"></select><textarea id="msgText"></textarea><button class="primary" onclick="sendMessage()" data-i18n="send">إرسال</button><h3 data-i18n="sentMessages">رسائلي</h3><div id="studentMessages" class="list"></div></div></div>
+</div></section>
+</main>
+<footer><div class="container">© 2026 Kafr El Hamadya Platform — Executed by Marwan DEV</div></footer>
+
+<div id="loginModal" class="modal"><div class="modalbox"><div class="topline"><h2 id="loginTitle"></h2><button class="ghost" onclick="closeModal()">×</button></div>
+<label id="nameLabel"></label><select id="teacherSelect" class="hidden"></select><input id="loginName" class="hidden">
+<label id="emailLabel">البريد الإلكتروني</label><input id="loginEmail" type="email" autocomplete="email" placeholder="name@example.com">
+<label data-i18n="password">كلمة المرور</label><input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••">
+<p id="loginError" style="color:#b91c1c"></p><div class="row"><button class="primary" id="loginButton" onclick="login()" data-i18n="login">دخول</button><button class="ghost" id="signupButton" onclick="openSignup()" data-i18n="signup">إنشاء حساب جديد</button></div>
+<p class="muted" id="authHint" style="font-size:12px">الحسابات والبيانات محفوظة الآن في قاعدة بيانات المنصة.</p></div></div>
+
+<div id="signupModal" class="modal"><div class="modalbox"><div class="topline"><h2 id="signupTitle">إنشاء حساب</h2><button class="ghost" onclick="closeModal()">×</button></div>
+<label>نوع الحساب</label><select id="signupRole"><option value="student">طالب</option><option value="teacher">مدرس</option></select>
+<label>الاسم</label><input id="signupName" placeholder="اكتب اسمك">
+<label>كلمة المرور</label><input id="signupPass" type="password" placeholder="اختر كلمة مرور">
+<p id="signupError" style="color:#b91c1c"></p><button class="primary" onclick="signup()">إنشاء الحساب</button>
+<p class="muted" style="font-size:12px">المدرس لا يستطيع إنشاء حساب مدرس إلا إذا كان اسمه ضمن قائمة المدرسين المعتمدين.</p></div></div>
+
+<div id="examModal" class="modal"><div class="modalbox"><div class="topline"><h2 id="runTitle"></h2><span class="timer" id="timer"></span></div><div id="runQuestions"></div><button class="primary" onclick="submitExam()" data-i18n="finish">إنهاء الامتحان</button><div id="examResult"></div></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL="https://dttvzewgptwwknrtzqwk.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_2vcoeLpkx0XY4f2ujPKLNA__humG0YX";
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+
+const teachers=[
+{name:"أستاذ محمود المرسي",en:"Mr. Mahmoud El Morsy"},
+{name:"استاذ محمد عادل",en:"Mr. Mohamed Adel"},
+{name:"أبله رانيا",en:"Ms. Rania"},
+{name:"استاذ احمد كمال",en:"Mr. Ahmed Kamal"},
+{name:"استاذ احمد شوقي",en:"Mr. Ahmed Shawky"},
+{name:"استاذ سيد ضدار",en:"Mr. Sayed Dodar"},
+{name:"أبله سعيده",en:"Ms. Saida"}];
+
+const T={
+ar:{brand:"منصة كفر الحمادية",install:"تحميل التطبيق",teacherLogin:"دخول كـ مدرس",studentLogin:"دخول كـ طالب",badge:"تعليم • اختبارات • تواصل",heroTitle:"تعلم بذكاء، واختبر نفسك بثقة.",heroText:"منصة تعليمية متكاملة لإدارة الاختبارات والبوستات والتواصل بين المدرس والطالب، بواجهة بسيطة وسريعة.",startStudent:"ابدأ كطالب",startTeacher:"لوحة المدرس",teachers:"مدرسون معتمدون",local:"تعلم وتواصل",fast:"سريع وخفيف",features:"مميزات المنصة",f1:"اختبارات بوقت وعدّاد تنازلي",f2:"أسئلة واختيارات ونتيجة فورية",f3:"رسائل خاصة بين الطالب والمدرس",f4:"نشر بوستات وإعلانات تعليمية",upgradeTitle:"الاشتراكات والترقية",upgradeText:"لتفعيل الحسابات أو الترقية، استخدم محفظة الدعم:",upgradeNote:"بعد التحويل، تواصل مع الدعم لتأكيد التفعيل. لا تُدخل بيانات الدفع داخل هذه الصفحة.",logout:"تسجيل الخروج",newExam:"إنشاء امتحان تفاعلي",examTitle:"عنوان الامتحان",duration:"المدة بالدقائق",addQuestion:"+ إضافة سؤال",publishExam:"حفظ الامتحان",newPost:"نشر بوست",publish:"نشر",myPosts:"البوستات",messages:"رسائل الطلاب",posts:"البوستات",exams:"الامتحانات",privateMsg:"مراسلة المدرس",chooseTeacher:"اختر المدرس",send:"إرسال",sentMessages:"رسائلي",password:"كلمة المرور",login:"دخول",signup:"إنشاء حساب جديد",finish:"إنهاء الامتحان"},
+en:{brand:"Kafr El Hamadya Platform",install:"Install App",teacherLogin:"Teacher Login",studentLogin:"Student Login",badge:"Learning • Exams • Communication",heroTitle:"Learn smarter. Test with confidence.",heroText:"A complete educational platform for exams, posts, and teacher-student communication, with a simple and fast interface.",startStudent:"Start as Student",startTeacher:"Teacher Dashboard",teachers:"Approved teachers",local:"Learning & communication",fast:"Fast & light",features:"Platform Features",f1:"Timed exams with countdown",f2:"Questions, choices, instant results",f3:"Private teacher-student messages",f4:"Educational posts and announcements",upgradeTitle:"Subscriptions & Upgrade",upgradeText:"To activate or upgrade accounts, use the support wallet:",upgradeNote:"After transferring, contact support for confirmation. Do not enter payment details on this page.",logout:"Log out",newExam:"Create Interactive Exam",examTitle:"Exam title",duration:"Duration in minutes",addQuestion:"+ Add question",publishExam:"Save exam",newPost:"Publish Post",publish:"Publish",myPosts:"Posts",messages:"Student Messages",posts:"Posts",exams:"Exams",privateMsg:"Message a Teacher",chooseTeacher:"Choose teacher",send:"Send",sentMessages:"My Messages",password:"Password",login:"Log in",signup:"Create account",finish:"Finish Exam"}};
+
+let lang="ar",loginRole="",currentUser=null,currentExam=null,timerId=null;
+
+function setLang(l){
+  lang=l;
+  document.documentElement.lang=l;
+  document.documentElement.dir=l==="ar"?"rtl":"ltr";
+  document.getElementById("arBtn").classList.toggle("active",l==="ar");
+  document.getElementById("enBtn").classList.toggle("active",l==="en");
+  document.querySelectorAll("[data-i18n]").forEach(e=>e.textContent=T[l][e.dataset.i18n]||e.textContent);
+  if(currentUser) renderDashboard();
+}
+
+function openLogin(role){
+  loginRole=role;
+  document.getElementById("loginModal").classList.add("show");
+  document.getElementById("signupModal").classList.remove("show");
+  document.getElementById("loginError").textContent="";
+  document.getElementById("loginPass").value="";
+  document.getElementById("loginEmail").value="";
+  const title=role==="teacher"?(lang==="ar"?"دخول المدرس":"Teacher Login"):(lang==="ar"?"دخول الطالب":"Student Login");
+  document.getElementById("loginTitle").textContent=title;
+  document.getElementById("nameLabel").textContent=role==="teacher"?(lang==="ar"?"اختر اسم المدرس":"Choose teacher"):(lang==="ar"?"اسم الطالب":"Student name");
+  document.getElementById("teacherSelect").classList.toggle("hidden",role!=="teacher");
+  document.getElementById("loginName").classList.toggle("hidden",role==="teacher");
+  document.getElementById("loginEmail").classList.add("hidden");
+  document.getElementById("emailLabel").classList.add("hidden");
+  if(role==="teacher"){
+    document.getElementById("teacherSelect").innerHTML=teachers.map(x=>`<option value="${x.name}">${lang==="ar"?x.name:x.en}</option>`).join("");
+  }else{
+    document.getElementById("loginName").placeholder=lang==="ar"?"اكتب اسم الطالب":"Enter student name";
+  }
+}
+function closeModal(){document.querySelectorAll(".modal").forEach(x=>x.classList.remove("show"))}
+
+function accountEmail(name){
+  const slug=[...name.trim().toLowerCase()].map(ch=>/[a-z0-9]/.test(ch)?ch:"").join("") || "user";
+  return slug+"."+btoa(unescape(encodeURIComponent(name.trim()))).replace(/[^a-zA-Z0-9]/g,"").slice(0,18)+"@kafr-hamadya.local";
+}
+
+function openSignup(){
+  closeModal();
+  document.getElementById("signupModal").classList.add("show");
+  document.getElementById("signupError").textContent="";
+  document.getElementById("signupName").value="";
+  document.getElementById("signupPass").value="";
+}
+
+async function signup(){
+  const role=document.getElementById("signupRole").value;
+  const name=document.getElementById("signupName").value.trim();
+  const pass=document.getElementById("signupPass").value;
+  const err=document.getElementById("signupError");
+  err.textContent="";
+  if(!name || pass.length<6){
+    err.textContent=lang==="ar"?"اكتب الاسم وكلمة مرور من 6 أحرف أو أكثر.":"Enter a name and a password of at least 6 characters.";
+    return;
+  }
+  if(role==="teacher" && !teachers.some(t=>t.name===name)){
+    err.textContent=lang==="ar"?"اسم المدرس غير موجود في قائمة المدرسين المعتمدين.":"This teacher name is not on the approved list.";
+    return;
+  }
+  const {data:existing}=await supabaseClient.from("profiles").select("id").eq("full_name",name).limit(1);
+  if(existing && existing.length){
+    err.textContent=lang==="ar"?"هذا الاسم مسجل بالفعل. استخدم اسمًا مختلفًا أو سجّل الدخول.":"This name is already registered. Use another name or log in.";
+    return;
+  }
+  const email=accountEmail(name);
+  const {data,error}=await supabaseClient.auth.signUp({
+    email,password:pass,
+    options:{data:{full_name:name,account_role:role}}
+  });
+  if(error){
+    err.textContent=error.message;
+    return;
+  }
+  if(data.session){
+    alert(lang==="ar"?"تم إنشاء الحساب. يمكنك الدخول الآن باسمك وكلمة المرور.":"Account created. You can log in now.");
+    closeModal();
+    return;
+  }
+  alert(lang==="ar"?"تم إنشاء الحساب. إذا طلبت Supabase تأكيد البريد، نحتاج تعطيل تأكيد البريد من إعدادات Auth حتى يعمل الدخول بالاسم مباشرة.":"Account created. If Supabase asks for email confirmation, disable email confirmation in Auth settings so name/password login works directly.");
+  closeModal();
+}
+
+async function login(){
+  const pass=document.getElementById("loginPass").value;
+  const selectedTeacher=loginRole==="teacher"?document.getElementById("teacherSelect").value:"";
+  const studentName=document.getElementById("loginName").value.trim();
+  const name=loginRole==="teacher"?selectedTeacher:studentName;
+  const err=document.getElementById("loginError");
+  err.textContent="";
+  if(!name||!pass){
+    err.textContent=lang==="ar"?"اكتب الاسم وكلمة المرور":"Enter the name and password";
+    return;
+  }
+  const {data:profile,error:lookupError}=await supabaseClient.from("profiles").select("*").eq("full_name",name).eq("role",loginRole).maybeSingle();
+  if(lookupError||!profile){
+    err.textContent=lang==="ar"?"الحساب غير موجود. أنشئ حسابًا أولاً.":"Account not found. Create an account first.";
+    return;
+  }
+  const email=accountEmail(name);
+  const {data,error}=await supabaseClient.auth.signInWithPassword({email,password:pass});
+  if(error){
+    err.textContent=lang==="ar"?"اسم المستخدم أو كلمة المرور غير صحيحة.":"Incorrect name or password.";
+    return;
+  }
+  currentUser={id:data.user.id,role:profile.role,name:profile.full_name,email:data.user.email};
+  closeModal();
+  await renderDashboard();
+}
+async function logout(){
+  await supabaseClient.auth.signOut();
+  currentUser=null;
+  document.getElementById("dashboard").classList.add("hidden");
+}
+
+async function renderDashboard(){
+  if(!currentUser)return;
+  document.getElementById("dashboard").classList.remove("hidden");
+  document.getElementById("teacherDash").classList.toggle("hidden",currentUser.role!=="teacher");
+  document.getElementById("studentDash").classList.toggle("hidden",currentUser.role!=="student");
+  document.getElementById("dashTitle").textContent=(currentUser.role==="teacher"?(lang==="ar"?"لوحة المدرس":"Teacher Dashboard"):(lang==="ar"?"لوحة الطالب":"Student Dashboard"))+" — "+currentUser.name;
+  document.getElementById("dashSub").textContent=lang==="ar"?"البيانات متصلة بقاعدة بيانات المنصة.":"Data is connected to the platform database.";
+  await renderAll();
+}
+
+function addQuestion(){
+  let box=document.getElementById("questions"),i=box.children.length;
+  let d=document.createElement("div");
+  d.className="q";
+  d.innerHTML=`<b>${lang==="ar"?"السؤال":"Question"} ${i+1}</b><input class="qtext" placeholder="${lang==="ar"?"نص السؤال":"Question text"}"><div class="row">${[0,1,2,3].map(n=>`<input class="opt" placeholder="${lang==="ar"?"الخيار":"Option"} ${n+1}">`).join("")}</div><label>${lang==="ar"?"رقم الإجابة الصحيحة (1-4)":"Correct option (1-4)"}</label><input class="correct" type="number" min="1" max="4" value="1">`;
+  box.appendChild(d);
+}
+
+function monthKey(d=new Date()){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")}
+
+async function getTeacherLimit(){
+  const {data:sub}=await supabaseClient.from("teacher_subscriptions").select("plan_id,plans(monthly_exam_limit)").eq("teacher_id",currentUser.id).eq("status","active").order("starts_at",{ascending:false}).limit(1).maybeSingle();
+  return sub?.plans?.monthly_exam_limit||2;
+}
+
+async function teacherExamCount(){
+  const start=new Date();
+  start.setDate(1); start.setHours(0,0,0,0);
+  const {count,error}=await supabaseClient.from("exams").select("id",{count:"exact",head:true}).eq("teacher_id",currentUser.id).gte("created_at",start.toISOString());
+  if(error) return 0;
+  return count||0;
+}
+
+async function renderPlan(){
+  if(!currentUser||currentUser.role!=="teacher")return;
+  const [c,lim]=await Promise.all([teacherExamCount(),getTeacherLimit()]);
+  document.getElementById("planInfo").innerHTML=`الحد الشهري الحالي: <b>${lim}</b> امتحان.`;
+  document.getElementById("monthlyExamInfo").innerHTML=`استخدمت <b>${c}</b> من <b>${lim}</b> امتحانات هذا الشهر.`;
+}
+
+async function saveExam(){
+  const title=document.getElementById("examTitle").value.trim();
+  const qs=[...document.querySelectorAll(".q")].map(q=>({
+    text:q.querySelector(".qtext").value.trim(),
+    options:[...q.querySelectorAll(".opt")].map(x=>x.value.trim()),
+    correct:+q.querySelector(".correct").value-1
+  })).filter(q=>q.text&&q.options.length===4&&q.options.every(Boolean)&&q.correct>=0&&q.correct<4);
+
+  if(!title||!qs.length){
+    alert(lang==="ar"?"أدخل عنوان الامتحان وسؤالاً واحداً صحيحًا على الأقل":"Enter a title and at least one valid question");
+    return;
+  }
+
+  const [count,limit]=await Promise.all([teacherExamCount(),getTeacherLimit()]);
+  if(count>=limit){
+    alert("انتهى الحد الشهري للامتحانات في باقتك. للتجديد أو زيادة الحد تواصل مع الدعم: 01221599078");
+    return;
+  }
+
+  const {data:exam,error:examError}=await supabaseClient.from("exams").insert({
+    teacher_id:currentUser.id,
+    title,
+    duration_minutes:+document.getElementById("duration").value||10,
+    published:true
+  }).select().single();
+
+  if(examError){
+    alert("تعذر حفظ الامتحان: "+examError.message);
+    return;
+  }
+
+  for(let i=0;i<qs.length;i++){
+    const q=qs[i];
+    const {data:question,error:qError}=await supabaseClient.from("questions").insert({
+      exam_id:exam.id,
+      question_text:q.text,
+      sort_order:i+1
+    }).select().single();
+    if(qError){alert("حدث خطأ أثناء حفظ الأسئلة: "+qError.message);return;}
+
+    const rows=q.options.map((text,j)=>({question_id:question.id,option_text:text,is_correct:j===q.correct}));
+    const {error:oError}=await supabaseClient.from("options").insert(rows);
+    if(oError){alert("حدث خطأ أثناء حفظ الاختيارات: "+oError.message);return;}
+  }
+
+  document.getElementById("examTitle").value="";
+  document.getElementById("questions").innerHTML="";
+  addQuestion();
+  alert(lang==="ar"?"تم حفظ ونشر الامتحان في قاعدة البيانات":"Exam saved and published to the database");
+  await renderAll();
+}
+
+async function publishPost(){
+  const text=document.getElementById("postText").value.trim();
+  if(!text)return;
+  const {error}=await supabaseClient.from("posts").insert({teacher_id:currentUser.id,content:text,published:true});
+  if(error){alert("تعذر نشر البوست: "+error.message);return;}
+  document.getElementById("postText").value="";
+  await renderAll();
+}
+
+async function getProfiles(ids){
+  ids=[...new Set(ids.filter(Boolean))];
+  if(!ids.length)return {};
+  const {data}=await supabaseClient.from("profiles").select("id,full_name,role").in("id",ids);
+  return Object.fromEntries((data||[]).map(p=>[p.id,p]));
+}
+
+async function renderAll(){
+  if(!currentUser)return;
+  await renderPlan();
+
+  const {data:posts}=await supabaseClient.from("posts").select("*").order("created_at",{ascending:false});
+  const {data:exams}=await supabaseClient.from("exams").select("*").order("created_at",{ascending:false});
+  const {data:msgs}=await supabaseClient.from("messages").select("*").order("created_at",{ascending:false});
+  const teacherIds=[...(posts||[]).map(p=>p.teacher_id),...(msgs||[]).map(m=>m.sender_id),...(msgs||[]).map(m=>m.receiver_id)];
+  const profiles=await getProfiles(teacherIds);
+
+  const ownPosts=(posts||[]).filter(p=>p.teacher_id===currentUser.id);
+  const ownMsgs=(msgs||[]).filter(m=>m.receiver_id===currentUser.id||m.sender_id===currentUser.id);
+
+  document.getElementById("teacherPosts").innerHTML=ownPosts.map(p=>`<div class="item">${esc(p.content)}<small class="muted"><br>${new Date(p.created_at).toLocaleString()}</small></div>`).join("")||`<span class="muted">—</span>`;
+
+  document.getElementById("teacherMessages").innerHTML=ownMsgs.filter(m=>m.receiver_id===currentUser.id).map(m=>`<div class="item"><b>${esc(profiles[m.sender_id]?.full_name||"Student")}</b><br>${esc(m.content)}<small class="muted"><br>${new Date(m.created_at).toLocaleString()}</small></div>`).join("")||`<span class="muted">—</span>`;
+
+  document.getElementById("studentPosts").innerHTML=(posts||[]).filter(p=>p.published).map(p=>`<div class="item"><b>${esc(profiles[p.teacher_id]?.full_name||"Teacher")}</b><br>${esc(p.content)}<small class="muted"><br>${new Date(p.created_at).toLocaleString()}</small></div>`).join("")||`<span class="muted">—</span>`;
+
+  document.getElementById("studentExams").innerHTML=(exams||[]).filter(e=>e.published).map(e=>`<div class="item"><b>${esc(e.title)}</b><br><small>${esc(profiles[e.teacher_id]?.full_name||"Teacher")} · ${e.duration_minutes} min</small><br><button class="primary" onclick="startExam('${e.id}')">${lang==="ar"?"ابدأ":"Start"}</button></div>`).join("")||`<span class="muted">—</span>`;
+
+  const {data:teacherProfiles}=await supabaseClient.from("profiles").select("id,full_name").eq("role","teacher");
+  document.getElementById("msgTeacher").innerHTML=(teacherProfiles||[]).map(t=>`<option value="${t.id}">${esc(lang==="ar"?t.full_name:t.full_name)}</option>`).join("");
+
+  document.getElementById("studentMessages").innerHTML=(msgs||[]).filter(m=>m.sender_id===currentUser.id||m.receiver_id===currentUser.id).map(m=>{
+    const other=profiles[m.sender_id===currentUser.id?m.receiver_id:m.sender_id];
+    return `<div class="item"><b>${esc(other?.full_name||"User")}</b><br>${esc(m.content)}<small class="muted"><br>${new Date(m.created_at).toLocaleString()}</small></div>`;
+  }).join("")||`<span class="muted">—</span>`;
+}
+
+async function sendMessage(){
+  const text=document.getElementById("msgText").value.trim();
+  const teacher=document.getElementById("msgTeacher").value;
+  if(!text||!teacher)return;
+  const {error}=await supabaseClient.from("messages").insert({sender_id:currentUser.id,receiver_id:teacher,content:text});
+  if(error){alert("تعذر إرسال الرسالة: "+error.message);return;}
+  document.getElementById("msgText").value="";
+  await renderAll();
+}
+
+async function startExam(id){
+  const {data:exam,error}=await supabaseClient.from("exams").select("*").eq("id",id).single();
+  if(error||!exam)return;
+  const {data:questions}=await supabaseClient.from("questions").select("*,options(*)").eq("exam_id",id).order("sort_order");
+  currentExam={...exam,questions:questions||[]};
+  document.getElementById("examModal").classList.add("show");
+  document.getElementById("runTitle").textContent=currentExam.title;
+  document.getElementById("examResult").innerHTML="";
+  document.getElementById("runQuestions").innerHTML=currentExam.questions.map((q,i)=>`<div class="q"><b>${i+1}. ${esc(q.question_text)}</b>${(q.options||[]).sort((a,b)=>a.id-b.id).map((o,j)=>`<label class="option"><input type="radio" name="q${i}" value="${o.id}"> ${esc(o.option_text)}</label>`).join("")}</div>`).join("");
+  const end=Date.now()+currentExam.duration_minutes*60000;
+  clearInterval(timerId);
+  timerId=setInterval(()=>{
+    const s=Math.max(0,Math.ceil((end-Date.now())/1000));
+    document.getElementById("timer").textContent=Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
+    if(!s){clearInterval(timerId);submitExam()}
+  },250);
+}
+
+async function submitExam(){
+  if(!currentExam)return;
+  clearInterval(timerId);
+  let score=0;
+  currentExam.questions.forEach((q,i)=>{
+    const v=document.querySelector(`input[name="q${i}"]:checked`);
+    const correct=(q.options||[]).find(o=>o.is_correct);
+    if(v&&correct&&String(v.value)===String(correct.id))score++;
+  });
+
+  const {error}=await supabaseClient.from("exam_attempts").insert({
+    exam_id:currentExam.id,
+    student_id:currentUser.id,
+    score,
+    total:currentExam.questions.length,
+    submitted_at:new Date().toISOString()
+  });
+
+  document.getElementById("examResult").innerHTML=`<div class="result"><b>${lang==="ar"?"نتيجتك":"Your result"}: ${score}/${currentExam.questions.length}</b>${error?`<br><small>تعذر حفظ النتيجة: ${esc(error.message)}</small>`:""}</div>`;
+}
+
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+
+let deferredPrompt=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e});
+async function installApp(){
+  if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null}
+  else alert(lang==="ar"?"للتثبيت كـتطبيق، افتح الصفحة في Chrome ثم استخدم قائمة المتصفح > تثبيت التطبيق/إضافة إلى الشاشة الرئيسية.":"To install as an app, use Chrome's menu and choose Install app/Add to Home screen.")
+}
+
+async function init(){
+  const {data:{session}}=await supabaseClient.auth.getSession();
+  if(session){
+    const {data:profile}=await supabaseClient.from("profiles").select("*").eq("id",session.user.id).maybeSingle();
+    if(profile)currentUser={id:session.user.id,role:profile.role,name:profile.full_name,email:session.user.email};
+  }
+  addQuestion();
+  setLang("ar");
+  if(currentUser)await renderDashboard();
+}
+
+supabaseClient.auth.onAuthStateChange(async (_event,session)=>{
+  if(!session){currentUser=null;return;}
+});
+
+init();
+</script>
+</body></html>

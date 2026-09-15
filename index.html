@@ -64,7 +64,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);text-a
 <div class="card"><h3>المتقدمة</h3><p class="muted">حد أعلى للاستخدام، ويُحدد التفعيل من الإدارة.</p></div>
 </div>
 <p class="muted" style="margin-top:18px">نظام اشتراكات مرن لإدارة الباقات وتفعيل الحسابات وتنظيم الامتحانات.</p>
-<h2 data-i18n="upgradeTitle">الاشتراكات والترقية</h2><p class="muted" data-i18n="upgradeText">لتفعيل الحسابات أو الترقية، استخدم محفظة الدعم:</p><div class="panel"><b style="font-size:24px">01221599078</b><p class="muted" data-i18n="upgradeNote">بعد التحويل، تواصل مع الدعم لتأكيد التفعيل. لا تُدخل بيانات الدفع داخل هذه الصفحة.</p></div></div></section>
+<h2 data-i18n="upgradeTitle">الاشتراكات والترقية</h2><p class="muted" data-i18n="upgradeText">لترقية المدرس إلى الباقة المميزة، اختر الترقية من لوحة المدرس.</p></div></section>
 
 <section id="dashboard" class="dashboard hidden"><div class="container">
 <div class="topline"><div><h2 id="dashTitle"></h2><p class="muted" id="dashSub"></p></div><button class="ghost" onclick="logout()" data-i18n="logout">تسجيل الخروج</button></div>
@@ -72,14 +72,14 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);text-a
 <div class="cards" style="margin-bottom:18px">
 <div class="card"><h3>📊 باقتي الحالية</h3><div id="planInfo" class="muted"></div></div>
 <div class="card"><h3>📅 الامتحانات هذا الشهر</h3><div id="monthlyExamInfo" class="muted"></div></div>
-<div class="card"><h3>💳 الترقية</h3><div class="muted">لزيادة عدد الامتحانات أو تفعيل باقة، تواصل مع الدعم على <b>01221599078</b>.</div></div>
+<div class="card"><h3>💳 الترقية المميزة</h3><div class="muted">الباقة المميزة: <b>50 جنيه شهريًا</b>.</div><button class="primary" style="margin-top:10px" onclick="showPremiumInfo()">عرض طريقة الترقية</button></div>
 </div>
 <div class="grid2">
 <div class="card"><h3 data-i18n="newExam">إنشاء امتحان تفاعلي</h3>
 <label data-i18n="examTitle">عنوان الامتحان</label><input id="examTitle">
 <label data-i18n="duration">المدة بالدقائق</label><input id="duration" type="number" min="1" value="10">
 <label>الباقة / الحد الشهري</label>
-<select id="planSelect"><option value="2">أساسية — 2 امتحان/شهر</option><option value="3">متوسطة — 3 امتحانات/شهر</option><option value="30">يومية/متقدمة — حتى 30 امتحانًا/شهر</option></select>
+<select id="planSelect"><option value="2">أساسية — 2 امتحان/شهر</option><option value="3">متوسطة — 3 امتحانات/شهر</option><option value="30">مميزة — حتى 30 امتحانًا/شهر — 50 جنيه</option></select>
 <div id="questions"></div><button class="ghost" onclick="addQuestion()" data-i18n="addQuestion">+ إضافة سؤال</button>
 <button class="primary" onclick="saveExam()" data-i18n="publishExam">حفظ الامتحان</button></div>
 <div class="card"><h3 data-i18n="newPost">نشر بوست</h3><textarea id="postText" placeholder="اكتب إعلاناً أو معلومة تعليمية..."></textarea><button class="primary" onclick="publishPost()" data-i18n="publish">نشر</button>
@@ -289,6 +289,10 @@ function addQuestion(){
   box.appendChild(d);
 }
 
+function showPremiumInfo(){
+  alert("الباقة المميزة: 50 جنيه شهريًا\nالتحويل على محفظة: 01147757094\nبعد التحويل، تواصل مع إدارة المنصة لتفعيل الباقة.");
+}
+
 function monthKey(d=new Date()){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")}
 
 async function getTeacherLimit(){
@@ -326,7 +330,7 @@ async function saveExam(){
 
   const [count,limit]=await Promise.all([teacherExamCount(),getTeacherLimit()]);
   if(count>=limit){
-    alert("انتهى الحد الشهري للامتحانات في باقتك. للتجديد أو زيادة الحد تواصل مع الدعم: 01221599078");
+    alert("انتهى الحد الشهري للامتحانات في باقتك. للتجديد أو زيادة الحد تواصل مع الدعم: 01147757094");
     return;
   }
 

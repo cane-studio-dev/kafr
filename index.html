@@ -78,6 +78,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);text-a
 <div class="card"><h3 data-i18n="newExam">إنشاء امتحان تفاعلي</h3>
 <label data-i18n="examTitle">عنوان الامتحان</label><input id="examTitle">
 <label data-i18n="duration">المدة بالدقائق</label><input id="duration" type="number" min="1" value="10">
+<label>استهداف الصف الدراسي</label><select id="examTargetGrade"><option value="all">كل الصفوف</option><option value="الصف الأول الابتدائي">الصف الأول الابتدائي</option><option value="الصف الثاني الابتدائي">الصف الثاني الابتدائي</option><option value="الصف الثالث الابتدائي">الصف الثالث الابتدائي</option><option value="الصف الرابع الابتدائي">الصف الرابع الابتدائي</option><option value="الصف الخامس الابتدائي">الصف الخامس الابتدائي</option><option value="الصف السادس الابتدائي">الصف السادس الابتدائي</option><option value="الصف الأول الإعدادي">الصف الأول الإعدادي</option><option value="الصف الثاني الإعدادي">الصف الثاني الإعدادي</option><option value="الصف الثالث الإعدادي">الصف الثالث الإعدادي</option></select>
 <label>الباقة / الحد الشهري</label>
 <select id="planSelect"><option value="2">أساسية — 2 امتحان/شهر</option><option value="3">متوسطة — 3 امتحانات/شهر</option><option value="30">مميزة — حتى 30 امتحانًا/شهر — 50 جنيه</option></select>
 <div id="questions"></div><button class="ghost" onclick="addQuestion()" data-i18n="addQuestion">+ إضافة سؤال</button>
@@ -86,7 +87,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);text-a
 <h3 data-i18n="myPosts">البوستات</h3><div id="teacherPosts" class="list"></div></div></div>
 <div class="card" style="margin-top:18px"><h3 data-i18n="messages">رسائل الطلاب</h3><div id="teacherMessages" class="list"></div></div></div>
 
-<div id="studentDash" class="hidden"><div class="grid2"><div class="card"><h3 data-i18n="posts">البوستات</h3><div id="studentPosts" class="list"></div></div>
+<div id="studentDash" class="hidden"><div class="card" style="margin-bottom:18px"><b>الصف الدراسي:</b> <span id="studentGradeLabel" class="muted"></span></div><div class="grid2"><div class="card"><h3 data-i18n="posts">البوستات</h3><div id="studentPosts" class="list"></div></div>
 <div class="card"><h3 data-i18n="exams">الامتحانات</h3><div id="studentExams" class="list"></div></div></div>
 <div class="grid2" style="margin-top:18px"><div class="card"><h3 data-i18n="activeUsers">المستخدمون النشطون</h3><p class="muted" style="font-size:13px" data-i18n="activeHint">الأخضر يعني نشط خلال آخر 10 دقائق.</p><div id="activeUsers" class="list"></div></div>
 <div class="card"><h3 data-i18n="privateMsg">المراسلة</h3><label data-i18n="choosePerson">اختر شخصًا</label><select id="msgPerson"></select><textarea id="msgText"></textarea><button class="primary" onclick="sendMessage()" data-i18n="send">إرسال</button><h3 data-i18n="sentMessages">رسائلي</h3><div id="studentMessages" class="list"></div></div></div></div>
@@ -105,6 +106,8 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);text-a
 <div id="signupModal" class="modal"><div class="modalbox"><div class="topline"><h2 id="signupTitle">إنشاء حساب</h2><button class="ghost" onclick="closeModal()">×</button></div>
 <label>نوع الحساب</label><select id="signupRole"><option value="student">طالب</option><option value="teacher">مدرس</option></select>
 <label>الاسم</label><input id="signupName" placeholder="اكتب اسمك">
+<label>الصف الدراسي</label><select id="signupGrade">
+<option value="">اختر الصف الدراسي</option><option value="الصف الأول الابتدائي">الصف الأول الابتدائي</option><option value="الصف الثاني الابتدائي">الصف الثاني الابتدائي</option><option value="الصف الثالث الابتدائي">الصف الثالث الابتدائي</option><option value="الصف الرابع الابتدائي">الصف الرابع الابتدائي</option><option value="الصف الخامس الابتدائي">الصف الخامس الابتدائي</option><option value="الصف السادس الابتدائي">الصف السادس الابتدائي</option><option value="الصف الأول الإعدادي">الصف الأول الإعدادي</option><option value="الصف الثاني الإعدادي">الصف الثاني الإعدادي</option><option value="الصف الثالث الإعدادي">الصف الثالث الإعدادي</option></select>
 <label>كلمة المرور</label><input id="signupPass" type="password" placeholder="اختر كلمة مرور">
 <p id="signupError" style="color:#b91c1c"></p><button class="primary" onclick="signup()">إنشاء الحساب</button>
 <p class="muted" style="font-size:12px">المدرس لا يستطيع إنشاء حساب مدرس إلا إذا كان اسمه ضمن قائمة المدرسين المعتمدين.</p></div></div>
@@ -166,9 +169,7 @@ async function openLogin(role){
   document.getElementById("loginEmail").classList.add("hidden");
   document.getElementById("emailLabel").classList.add("hidden");
   if(role==="teacher"){
-    const {data}=await supabaseClient.from("profiles").select("full_name").eq("role","teacher").order("full_name");
-    const dbTeachers=(data||[]).map(p=>p.full_name);
-    const names=dbTeachers.length?dbTeachers:[...new Set(teachers.map(t=>t.name))];
+    const names=teachers.map(t=>t.name);
     document.getElementById("teacherSelect").innerHTML=names.map(n=>{const t=teacherMatch(n); return `<option value="${esc(n)}">${esc(lang==="ar"?n:(t?.en||n))}</option>`}).join("");
   }else{
     document.getElementById("loginName").placeholder=lang==="ar"?"اكتب اسم الطالب":"Enter student name";
@@ -187,16 +188,22 @@ function openSignup(){
   document.getElementById("signupError").textContent="";
   document.getElementById("signupName").value="";
   document.getElementById("signupPass").value="";
+  document.getElementById("signupGrade").value="";
 }
 
 async function signup(){
   const role=document.getElementById("signupRole").value;
   const name=document.getElementById("signupName").value.trim();
+  const grade=document.getElementById("signupGrade").value;
   const pass=document.getElementById("signupPass").value;
   const err=document.getElementById("signupError");
   err.textContent="";
   if(!name || pass.length<6){
     err.textContent=lang==="ar"?"اكتب الاسم وكلمة مرور من 6 أحرف أو أكثر.":"Enter a name and a password of at least 6 characters.";
+    return;
+  }
+  if(role==="student" && !grade){
+    err.textContent=lang==="ar"?"اختر الصف الدراسي.":"Choose the school grade.";
     return;
   }
   if(role==="teacher" && !teacherMatch(name)){
@@ -212,7 +219,7 @@ async function signup(){
   const email=accountEmail(canonicalName);
   const {data,error}=await supabaseClient.auth.signUp({
     email,password:pass,
-    options:{data:{full_name:canonicalName,account_role:role}}
+    options:{data:{full_name:canonicalName,account_role:role,grade:role==="student"?grade:null}}
   });
   if(error){
     err.textContent=error.message;
@@ -260,7 +267,7 @@ async function login(){
     err.textContent=lang==="ar"?"اسم المستخدم أو كلمة المرور غير صحيحة.":"Incorrect name or password.";
     return;
   }
-  currentUser={id:data.user.id,role:profile.role,name:profile.full_name,email:data.user.email};
+  currentUser={id:data.user.id,role:profile.role,name:profile.full_name,grade:profile.grade||"",email:data.user.email};
   await touchPresence();
   closeModal();
   await renderDashboard();
@@ -278,6 +285,7 @@ async function renderDashboard(){
   document.getElementById("studentDash").classList.toggle("hidden",currentUser.role!=="student");
   document.getElementById("dashTitle").textContent=(currentUser.role==="teacher"?(lang==="ar"?"لوحة المدرس":"Teacher Dashboard"):(lang==="ar"?"لوحة الطالب":"Student Dashboard"))+" — "+currentUser.name;
   document.getElementById("dashSub").textContent=lang==="ar"?"البيانات متصلة بقاعدة بيانات المنصة.":"Data is connected to the platform database.";
+  if(currentUser.role==="student") document.getElementById("studentGradeLabel").textContent=currentUser.grade||"غير محدد";
   await renderAll();
 }
 
@@ -338,6 +346,7 @@ async function saveExam(){
     teacher_id:currentUser.id,
     title,
     duration_minutes:+document.getElementById("duration").value||10,
+    target_grade:document.getElementById("examTargetGrade").value,
     published:true
   }).select().single();
 
@@ -361,6 +370,7 @@ async function saveExam(){
   }
 
   document.getElementById("examTitle").value="";
+  document.getElementById("examTargetGrade").value="all";
   document.getElementById("questions").innerHTML="";
   addQuestion();
   alert(lang==="ar"?"تم حفظ ونشر الامتحان في قاعدة البيانات":"Exam saved and published to the database");
@@ -427,7 +437,8 @@ async function renderAll(){
   }
 
   document.getElementById("studentPosts").innerHTML=(posts||[]).filter(e=>e.published).map(p=>`<div class="item"><b>${esc(profiles[p.teacher_id]?.full_name||"Teacher")}</b><br>${esc(p.content)}<small class="muted"><br>${new Date(p.created_at).toLocaleString()}</small></div>`).join("")||`<span class="muted">—</span>`;
-  document.getElementById("studentExams").innerHTML=(exams||[]).filter(e=>e.published).map(e=>`<div class="item"><b>${esc(e.title)}</b><br><small>${esc(profiles[e.teacher_id]?.full_name||"Teacher")} · ${e.duration_minutes} min</small><br><button class="primary" onclick="startExam('${e.id}')">${lang==="ar"?"ابدأ":"Start"}</button></div>`).join("")||`<span class="muted">—</span>`;
+  const visibleExams=(exams||[]).filter(e=>e.published && (!e.target_grade || e.target_grade==="all" || e.target_grade===currentUser.grade));
+  document.getElementById("studentExams").innerHTML=visibleExams.map(e=>`<div class="item"><b>${esc(e.title)}</b><br><small>${esc(profiles[e.teacher_id]?.full_name||"Teacher")} · ${e.duration_minutes} min · ${esc(e.target_grade&&e.target_grade!=="all"?e.target_grade:"كل الصفوف")}</small><br><button class="primary" onclick="startExam('${e.id}')">${lang==="ar"?"ابدأ":"Start"}</button></div>`).join("")||`<span class="muted">لا توجد امتحانات مخصصة لصفك حاليًا.</span>`;
   document.getElementById("studentMessages").innerHTML=(msgs||[]).filter(m=>m.sender_id===currentUser.id||m.receiver_id===currentUser.id).map(m=>{
     const other=profiles[m.sender_id===currentUser.id?m.receiver_id:m.sender_id];
     return `<div class="item"><b>${esc(other?.full_name||"User")}</b><br>${esc(m.content)}<small class="muted"><br>${new Date(m.created_at).toLocaleString()}</small></div>`;
@@ -499,7 +510,7 @@ async function init(){
   const {data:{session}}=await supabaseClient.auth.getSession();
   if(session){
     const {data:profile}=await supabaseClient.from("profiles").select("*").eq("id",session.user.id).maybeSingle();
-    if(profile)currentUser={id:session.user.id,role:profile.role,name:profile.full_name,email:session.user.email};
+    if(profile)currentUser={id:session.user.id,role:profile.role,name:profile.full_name,grade:profile.grade||"",email:session.user.email};
   }
   addQuestion();
   setLang("ar");

@@ -84,8 +84,17 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);text-a
 <label data-i18n="duration">المدة بالدقائق</label><input id="duration" type="number" min="1" value="10">
 <label>الباقة / الحد الشهري</label>
 <select id="planSelect"><option value="2">أساسية — 2 امتحان/شهر</option><option value="3">متوسطة — 3 امتحانات/شهر</option><option value="30">مميزة — حتى 30 امتحانًا/شهر — 50 جنيه</option></select>
-<div id="questions"></div><button class="ghost" onclick="addQuestion()" data-i18n="addQuestion">+ إضافة سؤال</button>
-<button class="primary" onclick="saveExam()" data-i18n="publishExam">حفظ الامتحان</button></div>
+<div id="questions"></div>
+<button class="ghost" type="button" onclick="addQuestion()" data-i18n="addQuestion">+ إضافة سؤال</button>
+<div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--line)">
+  <button class="primary" type="button" onclick="saveExam()" style="width:100%;font-size:16px;padding:14px 18px">
+    ⬇️ اضغط لحفظ الامتحان ونشره للطلاب
+  </button>
+  <div class="muted" style="font-size:12px;margin-top:7px;text-align:center">
+    عند الضغط سيتم حفظ الامتحان والأسئلة ونشره تلقائيًا لجميع الطلاب.
+  </div>
+</div>
+</div>
 <div class="card"><h3 data-i18n="newPost">نشر بوست</h3><textarea id="postText" placeholder="اكتب إعلاناً أو معلومة تعليمية..."></textarea><button class="primary" onclick="publishPost()" data-i18n="publish">نشر</button>
 <h3 data-i18n="myPosts">البوستات</h3><div id="teacherPosts" class="list"></div></div></div>
 <div class="card" style="margin-top:18px"><div class="topline"><h3>📚 امتحاناتي</h3><button class="ghost mini" onclick="renderTeacherExams()">تحديث</button></div><div id="teacherExams" class="list">جارٍ التحميل...</div></div>
@@ -170,18 +179,46 @@ function addQuestion(){
 function toggleQuestionType(sel){const q=sel.closest('.q');q.querySelector('.mcqFields').style.display=sel.value==='mcq'?'block':'none'}
 function renumberQuestions(){[...document.querySelectorAll("#questions .q")].forEach((q,i)=>q.querySelector("b").textContent="السؤال "+(i+1))}
 async function saveExam(){
+  if(!currentUser || currentUser.role!=="teacher"){alert("يجب تسجيل الدخول كمدرس أولًا.");return}
+  const btn=[...document.querySelectorAll("#teacherDash button")].find(b=>b.textContent.includes("اضغط لحفظ الامتحان ونشره"));
+  if(btn){btn.disabled=true;btn.textContent="⏳ جارٍ حفظ الامتحان ونشره...";}
   const title=document.getElementById("examTitle").value.trim(), rows=[...document.querySelectorAll("#questions .q")];
   const qs=rows.map(q=>{const type=q.querySelector('.qtype').value,opts=[...q.querySelectorAll('.opt')].map(x=>x.value.trim());return {text:q.querySelector('.qtext').value.trim(),type,points:Math.max(1,+q.querySelector('.points').value||1),options:opts,correct:+q.querySelector('.correct')?.value-1}}).filter(q=>q.text&&(q.type!=='mcq'||(q.options.length===4&&q.options.every(Boolean)&&q.correct>=0&&q.correct<4)));
-  if(!title||!qs.length){alert("أدخل عنوان الامتحان وسؤالًا صحيحًا واحدًا على الأقل.");return}
-  const [count,limit]=await Promise.all([teacherExamCount(),getTeacherLimit()]);if(count>=limit){alert("انتهى الحد الشهري للامتحانات في باقتك. الترقية: 50 جنيه على محفظة 01147757094.");return}
+  if(!title||!qs.length){
+    if(btn){btn.disabled=false;btn.textContent="⬇️ اضغط لحفظ الامتحان ونشره للطلاب";}
+    alert("أدخل عنوان الامتحان وسؤالًا صحيحًا واحدًا على الأقل.");return
+  }
+  const [count,limit]=await Promise.all([teacherExamCount(),getTeacherLimit()]);
+  if(count>=limit){
+    if(btn){btn.disabled=false;btn.textContent="⬇️ اضغط لحفظ الامتحان ونشره للطلاب";}
+    alert("انتهى الحد الشهري للامتحانات في باقتك. الترقية: 50 جنيه على محفظة 01147757094.");return
+  }
   const {data:exam,error}=await supabaseClient.from('exams').insert({teacher_id:currentUser.id,title,duration_minutes:+document.getElementById('duration').value||10,target_grade:'all',published:true}).select().single();
-  if(error){alert('تعذر حفظ الامتحان: '+error.message);return}
+  if(error){
+    if(btn){btn.disabled=false;btn.textContent="⬇️ اضغط لحفظ الامتحان ونشره للطلاب";}
+    alert('تعذر حفظ الامتحان: '+error.message);return
+  }
   for(let i=0;i<qs.length;i++){
     const q=qs[i],r=await supabaseClient.from('questions').insert({exam_id:exam.id,question_text:q.text,sort_order:i+1,question_type:q.type,points:q.points}).select().single();
-    if(r.error){alert('تعذر حفظ السؤال: '+r.error.message);return}
-    if(q.type==='mcq'){const o=await supabaseClient.from('options').insert(q.options.map((text,j)=>({question_id:r.data.id,option_text:text,is_correct:j===q.correct})));if(o.error){alert('تعذر حفظ الاختيارات: '+o.error.message);return}}
+    if(r.error){
+      if(btn){btn.disabled=false;btn.textContent="⬇️ اضغط لحفظ الامتحان ونشره للطلاب";}
+      alert('تعذر حفظ السؤال: '+r.error.message);return
+    }
+    if(q.type==='mcq'){
+      const o=await supabaseClient.from('options').insert(q.options.map((text,j)=>({question_id:r.data.id,option_text:text,is_correct:j===q.correct})));
+      if(o.error){
+        if(btn){btn.disabled=false;btn.textContent="⬇️ اضغط لحفظ الامتحان ونشره للطلاب";}
+        alert('تعذر حفظ الاختيارات: '+o.error.message);return
+      }
+    }
   }
-  window.lastCreatedExamId=exam.id;document.getElementById('examTitle').value='';document.getElementById('questions').innerHTML='';addQuestion();alert('تم حفظ ونشر الامتحان لكل الطلاب بنجاح.');await renderAll()
+  window.lastCreatedExamId=exam.id;
+  document.getElementById('examTitle').value='';
+  document.getElementById('questions').innerHTML='';
+  addQuestion();
+  if(btn){btn.disabled=false;btn.textContent="⬇️ اضغط لحفظ الامتحان ونشره للطلاب";}
+  alert('تم حفظ الامتحان ونشره للطلاب بنجاح. سيظهر تلقائيًا في لوحة الطلاب.');
+  await renderAll()
 }
 
 

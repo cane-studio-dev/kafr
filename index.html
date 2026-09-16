@@ -85,7 +85,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);text-a
 <label>استهداف الصف الدراسي</label><select id="examTargetGrade"><option value="all">كل الصفوف</option><option value="الصف الأول الابتدائي">الصف الأول الابتدائي</option><option value="الصف الثاني الابتدائي">الصف الثاني الابتدائي</option><option value="الصف الثالث الابتدائي">الصف الثالث الابتدائي</option><option value="الصف الرابع الابتدائي">الصف الرابع الابتدائي</option><option value="الصف الخامس الابتدائي">الصف الخامس الابتدائي</option><option value="الصف السادس الابتدائي">الصف السادس الابتدائي</option><option value="الصف الأول الإعدادي">الصف الأول الإعدادي</option><option value="الصف الثاني الإعدادي">الصف الثاني الإعدادي</option><option value="الصف الثالث الإعدادي">الصف الثالث الإعدادي</option></select>
 <label>الباقة / الحد الشهري</label>
 <select id="planSelect"><option value="2">أساسية — 2 امتحان/شهر</option><option value="3">متوسطة — 3 امتحانات/شهر</option><option value="30">مميزة — حتى 30 امتحانًا/شهر — 50 جنيه</option></select>
-<div class="item" style="margin:12px 0;background:#f8fafc"><b>📨 إرسال الامتحان للطلاب</b><p class="muted" style="margin:6px 0;font-size:12px">بعد حفظ الامتحان، اختر الطلاب من القائمة ثم اضغط الزر لإرسال الامتحان لهم.</p><select id="examSendStudents" multiple size="5"><option value="">جارٍ تحميل قائمة الطلاب...</option></select><button class="primary mini" type="button" style="margin-top:8px" onclick="sendCurrentExamToStudents()">إرسال الامتحان للطلاب المحددين</button><div id="examSendStatus" class="muted" style="margin-top:7px;font-size:12px"></div></div><div id="questions"></div><button class="ghost" onclick="addQuestion()" data-i18n="addQuestion">+ إضافة سؤال</button>
+<div class="item" style="margin:12px 0;background:#f8fafc"><b>📨 إرسال الامتحان للطلاب</b><p class="muted" style="margin:6px 0;font-size:12px">بعد حفظ الامتحان، اختر الصف لتصفية القائمة، ثم اختر طالبًا أو أكثر وأرسل الامتحان لهم.</p><label style="display:block;margin-top:8px">اختيار الصف للطلاب</label><select id="examStudentGradeFilter" onchange="filterExamStudents()"><option value="all">كل الصفوف</option><option value="الصف الأول الابتدائي">الصف الأول الابتدائي</option><option value="الصف الثاني الابتدائي">الصف الثاني الابتدائي</option><option value="الصف الثالث الابتدائي">الصف الثالث الابتدائي</option><option value="الصف الرابع الابتدائي">الصف الرابع الابتدائي</option><option value="الصف الخامس الابتدائي">الصف الخامس الابتدائي</option><option value="الصف السادس الابتدائي">الصف السادس الابتدائي</option><option value="الصف الأول الإعدادي">الصف الأول الإعدادي</option><option value="الصف الثاني الإعدادي">الصف الثاني الإعدادي</option><option value="الصف الثالث الإعدادي">الصف الثالث الإعدادي</option></select><label style="display:block;margin-top:8px">اختيار الطالب / الطلاب</label><select id="examSendStudents" multiple size="6"><option value="">جارٍ تحميل قائمة الطلاب...</option></select><button class="primary mini" type="button" style="margin-top:8px" onclick="sendCurrentExamToStudents()">📨 إرسال الامتحان للطلاب المحددين</button><div id="examSendStatus" class="muted" style="margin-top:7px;font-size:12px"></div></div><div id="questions"></div><button class="ghost" onclick="addQuestion()" data-i18n="addQuestion">+ إضافة سؤال</button>
 <button class="primary" onclick="saveExam()" data-i18n="publishExam">حفظ الامتحان</button></div>
 <div class="card"><h3 data-i18n="newPost">نشر بوست</h3><textarea id="postText" placeholder="اكتب إعلاناً أو معلومة تعليمية..."></textarea><button class="primary" onclick="publishPost()" data-i18n="publish">نشر</button>
 <h3 data-i18n="myPosts">البوستات</h3><div id="teacherPosts" class="list"></div></div></div>
@@ -182,23 +182,35 @@ async function saveExam(){
     if(r.error){alert('تعذر حفظ السؤال: '+r.error.message);return}
     if(q.type==='mcq'){const o=await supabaseClient.from('options').insert(q.options.map((text,j)=>({question_id:r.data.id,option_text:text,is_correct:j===q.correct})));if(o.error){alert('تعذر حفظ الاختيارات: '+o.error.message);return}}
   }
-  window.lastCreatedExamId=exam.id;document.getElementById('examTitle').value='';document.getElementById('examTargetGrade').value='all';document.getElementById('questions').innerHTML='';addQuestion();document.getElementById('examSendStatus').textContent='تم حفظ الامتحان. اختر الطلاب من القائمة ثم اضغط إرسال الامتحان للطلاب المحددين.';alert('تم حفظ ونشر الامتحان بنجاح.');await renderAll()
+  window.lastCreatedExamId=exam.id;const target=document.getElementById('examTargetGrade').value;const studentGrade=document.getElementById('examStudentGradeFilter');if(studentGrade)studentGrade.value=target==='all'?'all':target;document.getElementById('examTitle').value='';document.getElementById('examTargetGrade').value='all';document.getElementById('questions').innerHTML='';addQuestion();document.getElementById('examSendStatus').textContent='تم حفظ الامتحان. اختر الطلاب من القائمة ثم اضغط إرسال الامتحان للطلاب المحددين.';await renderAll();filterExamStudents();alert('تم حفظ ونشر الامتحان بنجاح.');await renderAll()
 }
+function filterExamStudents(){
+  const filter=document.getElementById('examStudentGradeFilter')?.value||'all';
+  const sel=document.getElementById('examSendStudents');
+  if(!sel)return;
+  [...sel.options].forEach(o=>{
+    if(!o.value){o.hidden=false;return}
+    const grade=o.dataset.grade||'';
+    o.hidden=filter!=='all' && grade!==filter;
+    if(o.hidden)o.selected=false;
+  });
+}
+
 async function sendCurrentExamToStudents(){
   const status=document.getElementById('examSendStatus');
-  const examBox=document.getElementById('teacherExams');
   const sel=document.getElementById('examSendStudents');
-  if(!sel){return}
+  if(!sel)return;
   if(!window.lastCreatedExamId){
-    status.textContent='احفظ الامتحان أولًا، ثم اختر الطلاب وأرسله لهم من هنا.';
+    status.textContent='احفظ الامتحان أولًا، ثم اختر الصف والطلاب، وبعدها اضغط إرسال الامتحان.';
     return;
   }
   const ids=[...sel.selectedOptions].map(o=>o.value).filter(Boolean);
-  if(!ids.length){status.textContent='اختر طالبًا واحدًا على الأقل.';return}
+  if(!ids.length){status.textContent='اختر طالبًا واحدًا على الأقل من القائمة.';return}
   const rows=ids.map(student_id=>({exam_id:window.lastCreatedExamId,student_id,teacher_id:currentUser.id}));
   const {error}=await supabaseClient.from('exam_assignments').upsert(rows,{onConflict:'exam_id,student_id'});
   if(error){status.textContent='تعذر إرسال الامتحان: '+error.message;return}
-  status.textContent='✅ تم إرسال الامتحان للطلاب المحددين.';
+  status.textContent='✅ تم إرسال الامتحان للطلاب المحددين، وسيظهر لهم في قسم الامتحانات.';
+  [...sel.options].forEach(o=>o.selected=false);
 }
 
 async function publishPost(){const text=document.getElementById("postText").value.trim();if(!text)return;const {error}=await supabaseClient.from("posts").insert({teacher_id:currentUser.id,content:text,published:true});if(error){alert("تعذر نشر البوست: "+error.message);return}document.getElementById("postText").value="";await renderAll()}
@@ -225,8 +237,9 @@ async function renderPeople(){
   ["msgPerson","teacherMsgPerson"].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=optionHtml;});
   const examSel=document.getElementById('examSendStudents');
   if(examSel){
-    const students=people.filter(p=>p.role==='student');
-    examSel.innerHTML=students.map(p=>`<option value="${p.id}">${esc(p.full_name)}${p.grade?' — '+esc(p.grade):''}</option>`).join('')||'<option value="">لا يوجد طلاب مسجلون حاليًا</option>';
+    const students=people.filter(p=>p.role==='student' && p.grade);
+    examSel.innerHTML=students.map(p=>`<option value="${p.id}" data-grade="${esc(p.grade||'')}">${esc(p.full_name)} — ${esc(p.grade)}</option>`).join('')||'<option value="">لا يوجد طلاب مسجلون حاليًا</option>';
+    filterExamStudents();
   }
   const dir=document.getElementById("teacherDirectory");
   if(dir)dir.innerHTML=teachers.map(t=>{

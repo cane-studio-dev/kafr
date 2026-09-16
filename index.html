@@ -224,6 +224,10 @@ async function saveExam(){
 
 
 async function publishPost(){const text=document.getElementById("postText").value.trim();if(!text)return;const {error}=await supabaseClient.from("posts").insert({teacher_id:currentUser.id,content:text,published:true});if(error){alert("تعذر نشر البوست: "+error.message);return}document.getElementById("postText").value="";await renderAll()}
+async function teacherExamCount(){const start=new Date();start.setDate(1);start.setHours(0,0,0,0);const {data,error}=await supabaseClient.from('exams').select('id').eq('teacher_id',currentUser.id).gte('created_at',start.toISOString());if(error){console.warn('teacherExamCount error',error);return 0}return (data||[]).length}
+async function getTeacherLimit(){const sel=document.getElementById('planSelect');return sel?Number(sel.value)||2:2}
+async function renderPlan(){const [count,limit]=await Promise.all([teacherExamCount(),getTeacherLimit()]);const planBox=document.getElementById('planInfo');if(planBox)planBox.innerHTML=`الحد الشهري الحالي: <b>${limit}</b> امتحان.<br><small class="muted">للترقية، اضغط "عرض طريقة الترقية".</small>`;const monthBox=document.getElementById('monthlyExamInfo');if(monthBox)monthBox.innerHTML=`أنشأت <b>${count}</b> من <b>${limit}</b> امتحانات هذا الشهر.${count>=limit?'<br><small style="color:#b91c1c">وصلت للحد الأقصى — رقّي باقتك لإضافة المزيد.</small>':''}`}
+function showPremiumInfo(){alert('للترقية إلى الباقة المميزة (حتى 30 امتحانًا شهريًا):\n\n1) حوّل 50 جنيه على محفظة رقم 01147757094\n2) بعد التحويل، تواصل مع إدارة المنصة لتفعيل الترقية على حسابك.\n\nملحوظة: التفعيل حاليًا يدوي وبيتم من الإدارة بعد التأكد من التحويل.')}
 async function touchPresence(){if(!currentUser)return;await supabaseClient.from("profiles").update({last_seen_at:new Date().toISOString()}).eq("id",currentUser.id)}
 async function loadPeople(){
   const {data,error}=await supabaseClient.from("profiles").select("id,full_name,role,grade,last_seen_at").order("full_name");

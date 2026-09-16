@@ -75,7 +75,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);text-a
 </div>
 <div class="cards" style="margin-bottom:18px">
 <div class="card"><h3>📈 نتائج الطلاب</h3><div id="teacherAnalytics" class="muted">جارٍ التحميل...</div></div>
-<div class="card"><h3>📝 تصحيح الأسئلة المقالية</h3><div id="teacherGrading" class="list">جارٍ التحميل...</div></div>
+<div class="card"><h3>📝 نتائج وإجابات الطلاب</h3><div id="teacherGrading" class="list">جارٍ التحميل...</div></div>
 <div class="card"><h3>🔔 التنبيهات</h3><div id="teacherNotifications" class="list"></div></div>
 </div>
 <div class="grid2">
@@ -334,15 +334,70 @@ async function renderTeacherGrading(){
   const box=document.getElementById('teacherGrading');if(!box)return;
   const {data:exams}=await supabaseClient.from('exams').select('id,title').eq('teacher_id',currentUser.id).order('created_at',{ascending:false}).limit(30);if(!exams?.length){box.innerHTML='<span class="muted">لا توجد امتحانات.</span>';return}
   const ids=exams.map(e=>e.id),{data:attempts,error}=await supabaseClient.from('exam_attempts').select('id,exam_id,student_id,score,total,auto_score,manual_score,final_score,max_score,teacher_feedback,graded,submitted_at').in('exam_id',ids).order('submitted_at',{ascending:false}).limit(100);if(error){box.innerHTML='<span class="muted">تعذر تحميل محاولات الطلاب.</span>';return}
-  const studentIds=[...new Set((attempts||[]).map(a=>a.student_id))];const {data:students}=studentIds.length?await supabaseClient.from('profiles').select('id,full_name').in('id',studentIds):{data:[]};const sm=Object.fromEntries((students||[]).map(x=>[x.id,x.full_name]));
-  const essayQ=await supabaseClient.from('questions').select('id,exam_id,question_text,question_type,points').in('exam_id',ids).neq('question_type','mcq').order('sort_order');
-  const qmap=Object.fromEntries((essayQ.data||[]).map(q=>[q.id,q]));const eById=Object.fromEntries(exams.map(e=>[e.id,e.title]));
-  const aids=(attempts||[]).map(a=>a.id);const {data:answers}=aids.length?await supabaseClient.from('exam_answers').select('id,attempt_id,question_id,answer_text,answer_image,teacher_score,teacher_feedback').in('attempt_id',aids):{data:[]};
-  const hasEssayByAttempt=new Set((answers||[]).filter(a=>qmap[a.question_id]).map(a=>a.attempt_id));
-  box.innerHTML=(attempts||[]).filter(a=>hasEssayByAttempt.has(a.id)).map(a=>{const ans=(answers||[]).filter(x=>x.attempt_id===a.id&&qmap[x.question_id]);return `<div class="item"><b>👤 ${esc(sm[a.student_id]||'طالب')}</b><br><small class="muted">${esc(eById[a.exam_id]||'امتحان')} · ${new Date(a.submitted_at).toLocaleString('ar-EG')}</small>${ans.map(x=>`<div class="q" style="margin-top:10px"><b>${esc(qmap[x.question_id].question_text)}</b><br><small class="muted">الدرجة القصوى: ${qmap[x.question_id].points||1}</small>${x.answer_text?`<p style="white-space:pre-wrap">${esc(x.answer_text)}</p>`:''}${x.answer_image?`<img src="${x.answer_image}" style="max-width:100%;max-height:300px;border-radius:10px;margin-top:6px">`:''}<div class="row"><input id="score_${x.id}" type="number" min="0" max="${qmap[x.question_id].points||1}" step="0.5" value="${x.teacher_score??''}" placeholder="درجة السؤال" style="max-width:150px"><input id="feedback_${x.id}" value="${esc(x.teacher_feedback||'')}" placeholder="نصيحة / ملاحظة للطالب" style="flex:1"></div><button class="primary mini" onclick="gradeAnswer('${x.id}','${a.id}')">حفظ تصحيح السؤال</button></div>`).join('')}<div><b>النتيجة الحالية: ${a.final_score??a.score??0}/${a.max_score??a.total??0}</b>${a.teacher_feedback?`<br><span class="muted">النصيحة: ${esc(a.teacher_feedback)}</span>`:''}</div><button class="ghost mini" onclick="gradeAttempt('${a.id}')">حفظ الدرجة النهائية والنصيحة</button></div>`}).join('')||'<span class="muted">لا توجد إجابات مقالية بانتظار التصحيح.</span>'
+  if(!attempts?.length){box.innerHTML='<span class="muted">لا يوجد طلاب حلّوا امتحانات بعد.</span>';return}
+  const studentIds=[...new Set(attempts.map(a=>a.student_id))];const {data:students}=studentIds.length?await supabaseClient.from('profiles').select('id,full_name').in('id',studentIds):{data:[]};const sm=Object.fromEntries((students||[]).map(x=>[x.id,x.full_name]));
+  const {data:questions}=await supabaseClient.from('questions').select('id,exam_id,question_text,question_type,points,sort_order').in('exam_id',ids).order('sort_order');
+  const qmap=Object.fromEntries((questions||[]).map(q=>[q.id,q]));const eById=Object.fromEntries(exams.map(e=>[e.id,e.title]));
+  const mcqIds=(questions||[]).filter(q=>(q.question_type||'mcq')==='mcq').map(q=>q.id);
+  const {data:options}=mcqIds.length?await supabaseClient.from('options').select('id,question_id,option_text,is_correct').in('question_id',mcqIds):{data:[]};
+  const omap=Object.fromEntries((options||[]).map(o=>[o.id,o]));
+  const aids=attempts.map(a=>a.id);const {data:answers}=aids.length?await supabaseClient.from('exam_answers').select('id,attempt_id,question_id,answer_text,answer_image,selected_option_id,teacher_score').in('attempt_id',aids):{data:[]};
+  const byAttempt={};(answers||[]).forEach(x=>{(byAttempt[x.attempt_id]=byAttempt[x.attempt_id]||[]).push(x)});
+  box.innerHTML=attempts.map(a=>{
+    const ans=(byAttempt[a.id]||[]).slice().sort((x,y)=>(qmap[x.question_id]?.sort_order||0)-(qmap[y.question_id]?.sort_order||0));
+    const hasEssay=ans.some(x=>qmap[x.question_id]&&(qmap[x.question_id].question_type||'mcq')!=='mcq');
+    const statusBadge=hasEssay?(a.graded?'<span style="color:#15803d">✅ مصحح بالكامل</span>':'<span style="color:#b91c1c">⏳ بانتظار تصحيح المقالي</span>'):'<span style="color:#15803d">✅ تصحيح تلقائي</span>';
+    const rows=ans.map(x=>{
+      const q=qmap[x.question_id];if(!q)return'';
+      const type=q.question_type||'mcq';
+      if(type==='mcq'){
+        const chosen=x.selected_option_id?omap[x.selected_option_id]:null;
+        const correctOpt=(options||[]).find(o=>o.question_id===q.id&&o.is_correct);
+        const ok=!!(chosen&&chosen.is_correct);
+        return `<div class="q" style="margin-top:8px"><b>${esc(q.question_text)}</b><br><small class="muted">${q.points||1} درجة</small><div style="margin-top:6px">إجابة الطالب: <b style="color:${chosen?(ok?'#15803d':'#b91c1c'):'#6b7280'}">${chosen?esc(chosen.option_text):'لم يجب'}</b> ${chosen?(ok?'✅':'❌'):''}</div>${!ok?`<div class="muted" style="font-size:13px">الإجابة الصحيحة: ${esc(correctOpt?.option_text||'-')}</div>`:''}</div>`;
+      }
+      const maxP=q.points||1;
+      return `<div class="q" style="margin-top:8px"><b>${esc(q.question_text)}</b><br><small class="muted">مقالي · من ${maxP} درجة</small>${x.answer_text?`<p style="white-space:pre-wrap;margin:6px 0">${esc(x.answer_text)}</p>`:''}${x.answer_image?`<img src="${x.answer_image}" style="max-width:100%;max-height:280px;border-radius:10px;margin:6px 0">`:''}${!x.answer_text&&!x.answer_image?'<p class="muted">لم يُجب</p>':''}
+        <div class="row" style="margin-top:6px;align-items:center">
+          <button class="ghost mini" type="button" onclick="quickGrade('score_${x.id}',${maxP})">✅ صحيحة</button>
+          <button class="ghost mini" type="button" onclick="quickGrade('score_${x.id}',0)">❌ خاطئة</button>
+          <input id="score_${x.id}" type="number" min="0" max="${maxP}" step="0.5" value="${x.teacher_score??''}" placeholder="الدرجة" style="max-width:110px">
+          <button class="primary mini" type="button" onclick="gradeAnswer('${x.id}','${a.id}')">حفظ</button>
+        </div>${x.teacher_score!==null&&x.teacher_score!==undefined?`<small class="muted">آخر درجة محفوظة: ${x.teacher_score}/${maxP}</small>`:''}</div>`;
+    }).join('');
+    return `<div class="item">
+      <div class="user-row"><b>👤 ${esc(sm[a.student_id]||'طالب')}</b>${statusBadge}</div>
+      <small class="muted">${esc(eById[a.exam_id]||'امتحان')} · وقت الحل: ${new Date(a.submitted_at).toLocaleString('ar-EG')}</small>
+      <div style="margin-top:6px"><b>الدرجة: ${a.final_score??a.score??0}/${a.max_score??a.total??0}</b></div>
+      <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:700">عرض كل إجابات الطالب</summary>${rows||'<span class="muted">لا توجد أسئلة.</span>'}</details>
+      <label style="margin-top:10px">نصيحة عامة للطالب</label>
+      <textarea id="advice_${a.id}" rows="2" placeholder="اكتب نصيحة أو ملاحظة عامة للطالب...">${esc(a.teacher_feedback||'')}</textarea>
+      <button class="ghost mini" style="margin-top:6px" type="button" onclick="saveAttemptFeedback('${a.id}')">حفظ النصيحة</button>
+    </div>`;
+  }).join('');
 }
-async function gradeAnswer(answerId,attemptId){const score=Number(document.getElementById('score_'+answerId).value),feedback=document.getElementById('feedback_'+answerId).value.trim();if(!Number.isFinite(score)||score<0){alert('أدخل درجة صحيحة.');return}const {error}=await supabaseClient.from('exam_answers').update({teacher_score:score,teacher_feedback:feedback||null,graded_at:new Date().toISOString()}).eq('id',answerId);if(error){alert('تعذر حفظ التصحيح: '+error.message);return}await gradeAttempt(attemptId,true);await renderAll()}
-async function gradeAttempt(attemptId,silent=false){const {data:a,error}=await supabaseClient.from('exam_attempts').select('id,auto_score,max_score').eq('id',attemptId).single();if(error||!a)return;const {data:ans}=await supabaseClient.from('exam_answers').select('teacher_score,teacher_feedback,question_id').eq('attempt_id',attemptId);let manual=0;let feedback=[];(ans||[]).forEach(x=>{if(Number.isFinite(Number(x.teacher_score)))manual+=Number(x.teacher_score);if(x.teacher_feedback)feedback.push(x.teacher_feedback)});const {error:u}=await supabaseClient.from('exam_attempts').update({manual_score:manual,final_score:Number(a.auto_score||0)+manual,score:Number(a.auto_score||0)+manual,teacher_feedback:feedback.join(' | ')||null,graded:(ans||[]).length>0&&(ans||[]).every(x=>x.teacher_score!==null&&x.teacher_score!==undefined)}).eq('id',attemptId);if(u&&!silent)alert('تعذر تحديث النتيجة: '+u.message)}
+function quickGrade(inputId,val){const el=document.getElementById(inputId);if(el)el.value=val}
+async function saveAttemptFeedback(attemptId){const ta=document.getElementById('advice_'+attemptId);const text=(ta?.value||'').trim();const {error}=await supabaseClient.from('exam_attempts').update({teacher_feedback:text||null}).eq('id',attemptId);if(error){alert('تعذر حفظ النصيحة: '+error.message);return}}
+async function gradeAnswer(answerId,attemptId){
+  const input=document.getElementById('score_'+answerId);const score=Number(input?.value);
+  if(!Number.isFinite(score)||score<0){alert('أدخل درجة صحيحة أو اضغط صح/خطأ.');return}
+  const {error}=await supabaseClient.from('exam_answers').update({teacher_score:score,graded_at:new Date().toISOString()}).eq('id',answerId);
+  if(error){alert('تعذر حفظ التصحيح: '+error.message);return}
+  await gradeAttempt(attemptId,true);
+  await renderTeacherGrading();
+}
+async function gradeAttempt(attemptId,silent=false){
+  const {data:a,error}=await supabaseClient.from('exam_attempts').select('id,auto_score').eq('id',attemptId).single();if(error||!a)return;
+  const {data:ans}=await supabaseClient.from('exam_answers').select('teacher_score,question_id').eq('attempt_id',attemptId);
+  const qIds=[...new Set((ans||[]).map(x=>x.question_id))];
+  const {data:qs}=qIds.length?await supabaseClient.from('questions').select('id,question_type').in('id',qIds):{data:[]};
+  const essayIds=new Set((qs||[]).filter(q=>(q.question_type||'mcq')!=='mcq').map(q=>q.id));
+  const essayAnswers=(ans||[]).filter(x=>essayIds.has(x.question_id));
+  let manual=0;essayAnswers.forEach(x=>{if(Number.isFinite(Number(x.teacher_score)))manual+=Number(x.teacher_score)});
+  const allGraded=essayAnswers.length>0&&essayAnswers.every(x=>x.teacher_score!==null&&x.teacher_score!==undefined);
+  const {error:u}=await supabaseClient.from('exam_attempts').update({manual_score:manual,final_score:Number(a.auto_score||0)+manual,score:Number(a.auto_score||0)+manual,graded:allGraded}).eq('id',attemptId);
+  if(u&&!silent)alert('تعذر تحديث النتيجة: '+u.message)
+}
 let deferredPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e});async function installApp(){if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null}else alert('للتثبيت افتح قائمة Chrome واختر تثبيت التطبيق.')}
 setInterval(()=>{if(currentUser){touchPresence();renderMessages();renderPeople()}},30*1000);
 setInterval(()=>{if(currentUser)touchPresence()},5*60*1000);

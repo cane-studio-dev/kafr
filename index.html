@@ -30,6 +30,20 @@ label{display:block;font-size:13px;font-weight:700;margin:10px 0 6px}input,texta
 .q{padding:14px;border:1px solid var(--line);border-radius:12px;margin:12px 0}.option{display:flex;gap:8px;align-items:center;margin:7px 0}.option input{width:auto}.timer{font-weight:800;font-size:20px}.result{padding:14px;border-radius:12px;background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
 footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);text-align:center}
 @media(max-width:800px){.hero-grid,.grid2,.cards{grid-template-columns:1fr}.nav{height:auto;padding:12px 0;flex-wrap:wrap}.logo{margin-inline-end:0}.stats{grid-template-columns:1fr 1fr}.hero{padding-top:40px}}
+
+.marwan-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;direction:ltr;margin:0 0 18px;min-height:82px}
+.marwan-center{display:flex;justify-content:center;align-items:center;min-height:58px;font-family:"Segoe Script","Brush Script MT","URW Chancery L",cursive;font-weight:300;font-size:clamp(34px,5vw,52px);letter-spacing:-4px;direction:ltr;white-space:nowrap}
+.marwan-center span{display:inline-block;font-weight:300;opacity:0;transform:translateY(7px);animation:none}
+.marwan-center span:nth-child(1){--c:#ff4f81;--d:.08s}.marwan-center span:nth-child(2){--c:#4f8cff;--d:.28s}.marwan-center span:nth-child(3){--c:#32c98a;--d:.48s}.marwan-center span:nth-child(4){--c:#ffb52e;--d:.68s}.marwan-center span:nth-child(5){--c:#a66cff;--d:.88s}.marwan-center span:nth-child(6){--c:#22bfd3;--d:1.08s}
+.marwan-center.playing span{animation:marwanLetter .38s ease var(--d) forwards,marwanGlow .45s ease calc(var(--d) + .28s) 1}
+.marwan-center.fadeout span{animation:marwanFade .7s ease forwards}
+.marwan-dev{font-family:Arial,sans-serif;font-size:13px;font-weight:700;letter-spacing:4px;color:#6b7280;margin-top:-2px}
+@keyframes marwanLetter{from{opacity:0;transform:translateY(7px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes marwanGlow{0%{color:var(--c);filter:saturate(1)}55%{color:var(--c);filter:saturate(2);text-shadow:0 0 10px var(--c)}100%{color:var(--c);filter:saturate(1);text-shadow:0 0 0 transparent}}
+@keyframes marwanFade{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-6px)}}
+.help-tip{display:block;color:var(--muted);font-size:12px;margin-top:6px}
+.admin-panel{border:2px solid #111827;background:#fff}
+.admin-badge{display:inline-block;padding:5px 9px;border-radius:999px;background:#eef2ff;font-size:12px;font-weight:700}
 </style>
 </head>
 <body>
@@ -42,7 +56,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);text-a
 
 <main id="home">
 <section class="hero"><div class="container hero-grid">
-<div><span class="badge" data-i18n="badge">تعليم • اختبارات • تواصل</span>
+<div><div class="marwan-wrap"><div id="marwanCenter" class="marwan-center" aria-label="Marwan"><span>M</span><span>a</span><span>r</span><span>w</span><span>a</span><span>n</span></div><div class="marwan-dev">Marwan DEV</div></div><span class="badge" data-i18n="badge">تعليم • اختبارات • تواصل</span>
 <h1 data-i18n="heroTitle">تعلم بذكاء، واختبر نفسك بثقة.</h1>
 <p data-i18n="heroText">منصة تعليمية متكاملة لإدارة الاختبارات والبوستات والتواصل بين المدرس والطالب، بواجهة بسيطة وسريعة.</p>
 <div class="row"><button class="primary" onclick="openLogin('student')" data-i18n="startStudent">ابدأ كطالب</button><button class="ghost" onclick="openLogin('teacher')" data-i18n="startTeacher">لوحة المدرس</button></div>
@@ -68,6 +82,15 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);text-a
 <section id="dashboard" class="dashboard hidden"><div class="container">
 <div class="topline"><div><h2 id="dashTitle"></h2><p class="muted" id="dashSub"></p></div><button class="ghost" onclick="logout()" data-i18n="logout">تسجيل الخروج</button></div>
 <div id="teacherDash" class="hidden">
+<div id="demoAdminPanel" class="card admin-panel hidden" style="margin-bottom:18px">
+<h3>🛠️ لوحة المدرس الافتراضي — إدارة المنصة</h3>
+<p class="muted">من هنا يمكنك فتح أو غلق الباقة المميزة لكل مدرس، وتحديدها حتى نهاية الشهر، وحذف الحسابات.</p>
+<div class="admin-badge">30 امتحانًا شهريًا • حتى آخر يوم في الشهر</div>
+<div id="adminTeachers" class="list" style="margin-top:14px">جارٍ تحميل المدرسين...</div>
+<h3 style="margin-top:20px">👥 حسابات المستخدمين</h3>
+<div id="adminUsers" class="list">جارٍ تحميل الحسابات...</div>
+</div>
+
 <div class="cards" style="margin-bottom:18px">
 <div class="card"><h3>📊 باقتي الحالية</h3><div id="planInfo" class="muted"></div></div>
 <div class="card"><h3>📅 الامتحانات هذا الشهر</h3><div id="monthlyExamInfo" class="muted"></div></div>
@@ -83,7 +106,8 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);text-a
 <label data-i18n="examTitle">عنوان الامتحان</label><input id="examTitle">
 <label data-i18n="duration">المدة بالدقائق</label><input id="duration" type="number" min="1" value="10">
 <label>الباقة / الحد الشهري</label>
-<select id="planSelect"><option value="2">أساسية — 2 امتحان/شهر</option><option value="3">متوسطة — 3 امتحانات/شهر</option><option value="30">مميزة — حتى 30 امتحانًا/شهر — 50 جنيه</option></select>
+<div id="teacherPlanStatus" class="attach-preview">جارٍ التحقق من الباقة...</div>
+<small class="help-tip">الحد المميز (30 امتحانًا) لا يفتح إلا من لوحة المدرس التجريبي بعد تأكيد التحويل.</small>
 <div id="questions"></div>
 <button class="ghost" type="button" onclick="addQuestion()" data-i18n="addQuestion">+ إضافة سؤال</button>
 <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--line)">
@@ -225,9 +249,23 @@ async function saveExam(){
 
 async function publishPost(){const text=document.getElementById("postText").value.trim();if(!text)return;const {error}=await supabaseClient.from("posts").insert({teacher_id:currentUser.id,content:text,published:true});if(error){alert("تعذر نشر البوست: "+error.message);return}document.getElementById("postText").value="";await renderAll()}
 async function teacherExamCount(){const start=new Date();start.setDate(1);start.setHours(0,0,0,0);const {data,error}=await supabaseClient.from('exams').select('id').eq('teacher_id',currentUser.id).gte('created_at',start.toISOString());if(error){console.warn('teacherExamCount error',error);return 0}return (data||[]).length}
-async function getTeacherLimit(){const sel=document.getElementById('planSelect');return sel?Number(sel.value)||2:2}
-async function renderPlan(){const [count,limit]=await Promise.all([teacherExamCount(),getTeacherLimit()]);const planBox=document.getElementById('planInfo');if(planBox)planBox.innerHTML=`الحد الشهري الحالي: <b>${limit}</b> امتحان.<br><small class="muted">للترقية، اضغط "عرض طريقة الترقية".</small>`;const monthBox=document.getElementById('monthlyExamInfo');if(monthBox)monthBox.innerHTML=`أنشأت <b>${count}</b> من <b>${limit}</b> امتحانات هذا الشهر.${count>=limit?'<br><small style="color:#b91c1c">وصلت للحد الأقصى — رقّي باقتك لإضافة المزيد.</small>':''}`}
-function showPremiumInfo(){alert('للترقية إلى الباقة المميزة (حتى 30 امتحانًا شهريًا):\n\n1) حوّل 50 جنيه على محفظة رقم 01147757094\n2) بعد التحويل، تواصل مع إدارة المنصة لتفعيل الترقية على حسابك.\n\nملحوظة: التفعيل حاليًا يدوي وبيتم من الإدارة بعد التأكد من التحويل.')}
+async function getPremiumControl(){
+  if(!currentUser)return null;
+  const {data,error}=await supabaseClient.from('teacher_premium_controls').select('teacher_id,active,starts_at,ends_at').eq('teacher_id',currentUser.id).maybeSingle();
+  if(error){console.warn('premium control error',error);return null}
+  if(!data||!data.active||!data.ends_at||new Date(data.ends_at).getTime()<Date.now())return null;
+  return data;
+}
+async function getTeacherLimit(){return (await getPremiumControl())?30:2}
+async function renderPlan(){
+  const premium=await getPremiumControl(),count=await teacherExamCount(),limit=premium?30:2;
+  const planBox=document.getElementById('planInfo'),status=document.getElementById('teacherPlanStatus'),monthBox=document.getElementById('monthlyExamInfo');
+  const until=premium?new Date(premium.ends_at).toLocaleDateString('ar-EG'):'غير مفعلة';
+  if(planBox)planBox.innerHTML=premium?`<b>الباقة المميزة مفعلة ✅</b><br>الحد: <b>30 امتحانًا</b> هذا الشهر.<br><small class="muted">مفعلة حتى ${until}</small>`:`<b>الباقة الأساسية</b><br>الحد: <b>2 امتحان</b> هذا الشهر.<br><small class="muted">التفعيل المميز يتم من الإدارة.</small>`;
+  if(status)status.innerHTML=premium?`<b>⭐ الباقة المميزة مفعلة</b> — حتى <b>${until}</b> — يمكنك نشر حتى 30 امتحانًا هذا الشهر.`:`<b>الباقة الأساسية</b> — يمكنك نشر حتى 2 امتحان هذا الشهر. التفعيل إلى 30 يتم من الإدارة فقط.`;
+  if(monthBox)monthBox.innerHTML=`أنشأت <b>${count}</b> من <b>${limit}</b> امتحانات هذا الشهر.${count>=limit?'<br><small style="color:#b91c1c">وصلت للحد الأقصى.</small>':''}`;
+}
+function showPremiumInfo(){alert('للطلب: حوّل 50 جنيه على محفظة 01147757094، وبعد التأكد من التحويل يتم تفعيل الباقة من المدرس الافتراضي حتى نهاية الشهر.')}
 async function touchPresence(){if(!currentUser)return;await supabaseClient.from("profiles").update({last_seen_at:new Date().toISOString()}).eq("id",currentUser.id)}
 async function loadPeople(){
   const {data,error}=await supabaseClient.from("profiles").select("id,full_name,role,grade,last_seen_at").order("full_name");
@@ -297,7 +335,7 @@ async function renderStudentGrades(){
   box.innerHTML=(attempts||[]).map(a=>`<div class="item"><b>📝 ${esc(em[a.exam_id]||'امتحان')}</b><br><span>الدرجة: <b>${a.final_score??a.score??0}/${a.max_score??a.total??0}</b></span>${a.graded?'<br><small>✅ تم تصحيح المقالي</small>':'<br><small class="muted">⏳ المقالي في انتظار التصحيح</small>'}${a.teacher_feedback?`<br><div style="margin-top:6px"><b>نصيحة المدرس:</b> ${esc(a.teacher_feedback)}</div>`:''}</div>`).join('')||'<span class="muted">لا توجد نتائج بعد.</span>'
 }
 async function renderNotifications(){if(!currentUser)return;const target=currentUser.role==='teacher'?document.getElementById('teacherNotifications'):document.getElementById('studentNotifications');if(!target)return;const {data:posts}=await supabaseClient.from('posts').select('id,content,created_at,teacher_id').eq('published',true).order('created_at',{ascending:false}).limit(5);const {data:exams}=await supabaseClient.from('exams').select('id,title,target_grade,created_at').eq('published',true).order('created_at',{ascending:false}).limit(5);let items=[];if(currentUser.role==='student')items=(exams||[]).filter(e=>e.target_grade==='all'||e.target_grade===currentUser.grade).slice(0,4).map(e=>`<div class="item">📝 امتحان جديد: <b>${esc(e.title)}</b><br><small class="muted">${e.target_grade==='all'?'لكل الصفوف':esc(e.target_grade)}</small></div>`);else items=(posts||[]).filter(p=>p.teacher_id===currentUser.id).slice(0,4).map(p=>`<div class="item">📢 تم نشر: <b>${esc(String(p.content).slice(0,70))}</b></div>`);target.innerHTML=items.join('')||'<span class="muted">لا توجد تنبيهات جديدة.</span>'}
-async function renderAll(){if(!currentUser)return;await touchPresence();if(currentUser.role==='teacher'){await Promise.all([renderPlan(),renderPeople(),renderMessages(),renderTeacherAnalytics(),renderTeacherGrading(),renderTeacherExams(),renderNotifications()]);const {data:posts,error}=await supabaseClient.from('posts').select('*').eq('teacher_id',currentUser.id).order('created_at',{ascending:false});document.getElementById('teacherPosts').innerHTML=error?'<span class="muted">تعذر تحميل البوستات: '+esc(error.message)+'</span>':((posts||[]).map(p=>`<div class="item"><div class="user-row"><div><b>📢 ${esc(p.content)}</b><br><small class="muted">${new Date(p.created_at).toLocaleString('ar-EG')}</small></div><button class="danger mini" onclick="deletePost('${p.id}')">حذف</button></div></div>`).join('')||'<span class="muted">لا توجد بوستات بعد.</span>')}else{const [posts,exams]=await Promise.all([supabaseClient.from('posts').select('*').eq('published',true).order('created_at',{ascending:false}),supabaseClient.from('exams').select('*').eq('published',true).order('created_at',{ascending:false})]);if(posts.error){document.getElementById('studentPosts').innerHTML='<span class="muted">تعذر تحميل المنشورات: '+esc(posts.error.message)+'</span>'}else document.getElementById('studentPosts').innerHTML=(posts.data||[]).map(p=>`<div class="item"><b>📢 ${esc(p.content)}</b><br><small class="muted">${new Date(p.created_at).toLocaleString('ar-EG')}</small></div>`).join('')||'<span class="muted">لا توجد منشورات.</span>';if(exams.error){document.getElementById('studentExams').innerHTML='<span class="muted">تعذر تحميل الامتحانات: '+esc(exams.error.message)+'</span>'}else{const eligible=(exams.data||[]).filter(e=>e.target_grade==='all'||e.target_grade===currentUser.grade);const teacherIds=[...new Set(eligible.map(e=>e.teacher_id).filter(Boolean))];const {data:teachers}=teacherIds.length?await supabaseClient.from('profiles').select('id,full_name').in('id',teacherIds):{data:[]};const tm=Object.fromEntries((teachers||[]).map(t=>[t.id,t.full_name]));document.getElementById('studentExams').innerHTML=eligible.map(e=>`<div class="item"><div class="user-row"><div><b>📝 ${esc(e.title)}</b><br><small class="muted">المدرس: ${esc(tm[e.teacher_id]||'مدرس المنصة')} · ${e.duration_minutes} دقيقة</small></div><button class="primary mini" onclick="startExam('${e.id}')">ابدأ الامتحان</button></div></div>`).join('')||'<span class="muted">لا توجد امتحانات الآن.</span>'}await Promise.all([renderPeople(),renderMessages(),renderStudentProgress(),renderStudentGrades(),renderNotifications()])}}
+async function renderAll(){if(!currentUser)return;await touchPresence();if(currentUser.role==='teacher'){await Promise.all([renderPlan(),renderPeople(),renderMessages(),renderTeacherAnalytics(),renderTeacherGrading(),renderTeacherExams(),renderNotifications(),renderAdminPanel()]);const {data:posts,error}=await supabaseClient.from('posts').select('*').eq('teacher_id',currentUser.id).order('created_at',{ascending:false});document.getElementById('teacherPosts').innerHTML=error?'<span class="muted">تعذر تحميل البوستات: '+esc(error.message)+'</span>':((posts||[]).map(p=>`<div class="item"><div class="user-row"><div><b>📢 ${esc(p.content)}</b><br><small class="muted">${new Date(p.created_at).toLocaleString('ar-EG')}</small></div><button class="danger mini" onclick="deletePost('${p.id}')">حذف</button></div></div>`).join('')||'<span class="muted">لا توجد بوستات بعد.</span>')}else{const [posts,exams]=await Promise.all([supabaseClient.from('posts').select('*').eq('published',true).order('created_at',{ascending:false}),supabaseClient.from('exams').select('*').eq('published',true).order('created_at',{ascending:false})]);if(posts.error){document.getElementById('studentPosts').innerHTML='<span class="muted">تعذر تحميل المنشورات: '+esc(posts.error.message)+'</span>'}else document.getElementById('studentPosts').innerHTML=(posts.data||[]).map(p=>`<div class="item"><b>📢 ${esc(p.content)}</b><br><small class="muted">${new Date(p.created_at).toLocaleString('ar-EG')}</small></div>`).join('')||'<span class="muted">لا توجد منشورات.</span>';if(exams.error){document.getElementById('studentExams').innerHTML='<span class="muted">تعذر تحميل الامتحانات: '+esc(exams.error.message)+'</span>'}else{const eligible=(exams.data||[]).filter(e=>e.target_grade==='all'||e.target_grade===currentUser.grade);const teacherIds=[...new Set(eligible.map(e=>e.teacher_id).filter(Boolean))];const {data:teachers}=teacherIds.length?await supabaseClient.from('profiles').select('id,full_name').in('id',teacherIds):{data:[]};const tm=Object.fromEntries((teachers||[]).map(t=>[t.id,t.full_name]));document.getElementById('studentExams').innerHTML=eligible.map(e=>`<div class="item"><div class="user-row"><div><b>📝 ${esc(e.title)}</b><br><small class="muted">المدرس: ${esc(tm[e.teacher_id]||'مدرس المنصة')} · ${e.duration_minutes} دقيقة</small></div><button class="primary mini" onclick="startExam('${e.id}')">ابدأ الامتحان</button></div></div>`).join('')||'<span class="muted">لا توجد امتحانات الآن.</span>'}await Promise.all([renderPeople(),renderMessages(),renderStudentProgress(),renderStudentGrades(),renderNotifications()])}}
 async function startExam(id){
   const submitBtn=document.getElementById("submitExamBtn");
   if(submitBtn)submitBtn.disabled=false;
@@ -362,7 +400,7 @@ async function renderTeacherGrading(){
           <button class="ghost mini" type="button" onclick="quickGrade('score_${x.id}',${maxP})">✅ صحيحة</button>
           <button class="ghost mini" type="button" onclick="quickGrade('score_${x.id}',0)">❌ خاطئة</button>
           <input id="score_${x.id}" type="number" min="0" max="${maxP}" step="0.5" value="${x.teacher_score??''}" placeholder="الدرجة" style="max-width:110px">
-          <button class="primary mini" type="button" onclick="gradeAnswer('${x.id}','${a.id}')">حفظ</button>
+          <button class="primary mini" type="button" onclick="gradeAnswer('${x.id}','${a.id}')">💾 حفظ الدرجة وإرسال التصحيح</button>
         </div>${x.teacher_score!==null&&x.teacher_score!==undefined?`<small class="muted">آخر درجة محفوظة: ${x.teacher_score}/${maxP}</small>`:''}</div>`;
     }).join('');
     return `<div class="item">
@@ -372,7 +410,7 @@ async function renderTeacherGrading(){
       <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:700">عرض كل إجابات الطالب</summary>${rows||'<span class="muted">لا توجد أسئلة.</span>'}</details>
       <label style="margin-top:10px">نصيحة عامة للطالب</label>
       <textarea id="advice_${a.id}" rows="2" placeholder="اكتب نصيحة أو ملاحظة عامة للطالب...">${esc(a.teacher_feedback||'')}</textarea>
-      <button class="ghost mini" style="margin-top:6px" type="button" onclick="saveAttemptFeedback('${a.id}')">حفظ النصيحة</button>
+      <button class="ghost mini" style="margin-top:6px" type="button" onclick="saveAttemptFeedback('${a.id}')">💾 حفظ النصيحة وإرسالها للطالب</button>
     </div>`;
   }).join('');
 }
@@ -398,10 +436,60 @@ async function gradeAttempt(attemptId,silent=false){
   const {error:u}=await supabaseClient.from('exam_attempts').update({manual_score:manual,final_score:Number(a.auto_score||0)+manual,score:Number(a.auto_score||0)+manual,graded:allGraded}).eq('id',attemptId);
   if(u&&!silent)alert('تعذر تحديث النتيجة: '+u.message)
 }
+function isDemoAdmin(){return !!currentUser&&currentUser.role==='teacher'&&normalizeName(currentUser.name)===normalizeName('المدرس التجريبي')}
+async function adminActivateTeacher(id){
+  if(!isDemoAdmin())return;
+  if(!confirm('فتح الباقة المميزة لهذا المدرس حتى نهاية الشهر؟'))return;
+  const {error}=await supabaseClient.rpc('activate_teacher_premium',{p_teacher_id:id});
+  if(error){alert('تعذر تفعيل الباقة: '+error.message);return}
+  alert('تم فتح الباقة المميزة: 30 امتحانًا حتى نهاية الشهر.');
+  await renderAdminPanel();
+}
+async function adminDeactivateTeacher(id){
+  if(!isDemoAdmin())return;
+  if(!confirm('غلق الباقة المميزة لهذا المدرس الآن؟'))return;
+  const {error}=await supabaseClient.rpc('deactivate_teacher_premium',{p_teacher_id:id});
+  if(error){alert('تعذر غلق الباقة: '+error.message);return}
+  alert('تم غلق الباقة المميزة.');
+  await renderAdminPanel();
+}
+async function adminDeleteUser(id,name){
+  if(!isDemoAdmin()||id===currentUser.id)return;
+  if(!confirm('حذف حساب '+name+' نهائيًا من المنصة؟\nسيتم حذف حساب الدخول وملفه من قاعدة البيانات.'))return;
+  const {error}=await supabaseClient.rpc('admin_delete_user',{p_user_id:id});
+  if(error){alert('تعذر حذف الحساب: '+error.message);return}
+  alert('تم حذف الحساب.');
+  await renderAdminPanel();
+}
+async function renderAdminPanel(){
+  const panel=document.getElementById('demoAdminPanel');if(!panel)return;
+  panel.classList.toggle('hidden',!isDemoAdmin());
+  if(!isDemoAdmin())return;
+  const [pr,subs]=await Promise.all([
+    supabaseClient.from('profiles').select('id,full_name,role,grade,created_at').order('created_at',{ascending:false}),
+    supabaseClient.from('teacher_premium_controls').select('teacher_id,active,starts_at,ends_at')
+  ]);
+  if(pr.error){document.getElementById('adminUsers').innerHTML='<span class="muted">تعذر تحميل الحسابات: '+esc(pr.error.message)+'</span>';return}
+  const people=pr.data||[], controls=Object.fromEntries((subs.data||[]).map(x=>[x.teacher_id,x]));
+  const teacherBox=document.getElementById('adminTeachers');
+  const teacherProfiles=people.filter(p=>p.role==='teacher');
+  teacherBox.innerHTML=teacherProfiles.map(p=>{
+    const c=controls[p.id], active=!!(c?.active&&c.ends_at&&new Date(c.ends_at).getTime()>=Date.now());
+    const until=active?new Date(c.ends_at).toLocaleDateString('ar-EG'):'غير مفعلة';
+    return `<div class="item"><div class="user-row"><div><b>👨‍🏫 ${esc(p.full_name)}</b><br><small class="muted">${active?'🟢 مميزة مفتوحة حتى '+until:'⚪ الباقة المميزة مغلقة'}</small></div><div class="row"><button class="primary mini" type="button" title="فتح الباقة المميزة 30 امتحانًا حتى نهاية الشهر" onclick="adminActivateTeacher('${p.id}')">🔓 فتح 30 امتحان</button><button class="danger mini" type="button" title="غلق الباقة المميزة" onclick="adminDeactivateTeacher('${p.id}')">🔒 غلق الباقة</button></div></div></div>`;
+  }).join('')||'<span class="muted">لا يوجد مدرسون.</span>';
+  const userBox=document.getElementById('adminUsers');
+  userBox.innerHTML=people.map(p=>{
+    const safeName=JSON.stringify(String(p.full_name||''));
+    return `<div class="item"><div class="user-row"><div><b>👤 ${esc(p.full_name)}</b><br><small class="muted">${p.role==='teacher'?'مدرس':'طالب'}${p.grade?' · '+esc(p.grade):''}</small></div>${p.id===currentUser.id?'<span class="muted">حسابك الحالي</span>':`<button class="danger mini" type="button" title="حذف الحساب نهائيًا" onclick="adminDeleteUser('${p.id}','${safeName}')">🗑️ حذف الحساب</button>`}</div></div>`;
+  }).join('')||'<span class="muted">لا توجد حسابات.</span>';
+}
 let deferredPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e});async function installApp(){if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null}else alert('للتثبيت افتح قائمة Chrome واختر تثبيت التطبيق.')}
 setInterval(()=>{if(currentUser){touchPresence();renderMessages();renderPeople()}},30*1000);
 setInterval(()=>{if(currentUser)touchPresence()},5*60*1000);
-async function init(){const {data:{session}}=await supabaseClient.auth.getSession();if(session){const {data:profile}=await supabaseClient.from('profiles').select('*').eq('id',session.user.id).maybeSingle();if(profile)currentUser={id:session.user.id,role:profile.role,name:profile.full_name,grade:profile.grade||'',email:session.user.email}}addQuestion();setLang('ar');if(currentUser)await renderDashboard()}
-supabaseClient.auth.onAuthStateChange(async(_event,session)=>{if(!session)currentUser=null});init();
+function labelButtons(){document.querySelectorAll('button').forEach(b=>{if(!b.getAttribute('title')){const t=(b.textContent||'').replace(/\s+/g,' ').trim();if(t)b.setAttribute('title',t)}})}
+function playMarwanLogo(){const el=document.getElementById('marwanCenter');if(!el)return;el.classList.remove('fadeout','playing');el.querySelectorAll('span').forEach(x=>{x.style.animation='none';x.style.opacity='0'});void el.offsetWidth;el.querySelectorAll('span').forEach(x=>x.style.animation='');el.classList.add('playing');setTimeout(()=>el.classList.add('fadeout'),3100)}
+async function init(){const {data:{session}}=await supabaseClient.auth.getSession();if(session){const {data:profile}=await supabaseClient.from('profiles').select('*').eq('id',session.user.id).maybeSingle();if(profile)currentUser={id:session.user.id,role:profile.role,name:profile.full_name,grade:profile.grade||'',email:session.user.email}}addQuestion();labelButtons();setLang('ar');if(currentUser)await renderDashboard()}
+supabaseClient.auth.onAuthStateChange(async(_event,session)=>{if(!session)currentUser=null});init();playMarwanLogo();
 </script>
 </body></html>

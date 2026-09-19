@@ -401,7 +401,8 @@ async function renderStudentProgress(){const box=document.getElementById('studen
 async function renderStudentGrades(){
   const box=document.getElementById('studentGrades');if(!box)return;
   const {data:attempts,error}=await supabaseClient.from('exam_attempts').select('id,exam_id,final_score,max_score,score,total,teacher_feedback,graded,submitted_at').eq('student_id',currentUser.id).order('submitted_at',{ascending:false}).limit(50);
-  if(error){box.innerHTML='<span class="muted">تعذر تحميل الدرجات.</span>';return}
+  if(error){box.innerHTML='<span class="muted" style="color:#b91c1c">⚠️ خطأ حقيقي من قاعدة البيانات: '+esc(error.message)+' (كود: '+esc(error.code||'-')+')</span>';return}
+  if(!attempts||!attempts.length){box.innerHTML='<span class="muted">لا توجد نتائج بعد. (تم الاتصال بقاعدة البيانات بنجاح ولم يُعثر على أي محاولة مسجلة باسم هذا الحساب)</span>';return}
   const ids=(attempts||[]).map(a=>a.exam_id);const {data:exams}=ids.length?await supabaseClient.from('exams').select('id,title').in('id',ids):{data:[]};const em=Object.fromEntries((exams||[]).map(e=>[e.id,e.title]));
   box.innerHTML=(attempts||[]).map(a=>`<div class="item"><b>📝 ${esc(em[a.exam_id]||'امتحان')}</b><br><span>الدرجة: <b>${a.final_score??a.score??0}/${a.max_score??a.total??0}</b></span>${a.graded?'<br><small>✅ تم تصحيح المقالي</small>':'<br><small class="muted">⏳ المقالي في انتظار التصحيح</small>'}${a.teacher_feedback?`<br><div style="margin-top:6px"><b>نصيحة المدرس:</b> ${esc(a.teacher_feedback)}</div>`:''}</div>`).join('')||'<span class="muted">لا توجد نتائج بعد.</span>'
 }

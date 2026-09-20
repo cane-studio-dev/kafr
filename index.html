@@ -93,7 +93,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);text-a
 <div class="cards" style="margin-bottom:18px">
 <div class="card"><h3>📊 باقتي الحالية</h3><div id="planInfo" class="muted"></div></div>
 <div class="card"><h3>📅 الامتحانات هذا الشهر</h3><div id="monthlyExamInfo" class="muted"></div></div>
-<div class="card"><h3>💳 الترقية المميزة</h3><div class="muted">الباقة المميزة: <b>50 جنيه شهريًا</b>.</div><button class="primary" style="margin-top:10px" title="يعرض رقم المحفظة وخطوات طلب تفعيل الباقة المدفوعة" onclick="showPremiumInfo()">عرض طريقة الترقية</button></div>
+<div class="card"><h3>💳 الترقية المميزة</h3><div class="muted">الباقة المميزة: <b>50 جنيه شهريًا</b>.</div><button class="primary" style="margin-top:10px" title="يعرض رقم التحويل وخطوات طلب تفعيل الباقة المدفوعة" onclick="showPremiumInfo()">عرض طريقة الترقية</button></div>
 </div>
 <div class="cards" style="margin-bottom:18px">
 <div class="card"><h3>📈 نتائج الطلاب</h3><div id="teacherAnalytics" class="muted">جارٍ التحميل...</div></div>
@@ -328,7 +328,7 @@ async function saveExam(){
   const [count,limit]=await Promise.all([teacherExamCount(),getTeacherLimit()]);
   if(count>=limit){
     if(btn){btn.disabled=false;btn.textContent="⬇️ اضغط لحفظ الامتحان ونشره للطلاب";}
-    alert("انتهى الحد الشهري للامتحانات في باقتك. الترقية: 50 جنيه على محفظة 01147757094.");return
+    alert("انتهى الحد الشهري للامتحانات في باقتك. الترقية: حوّل 50 جنيه رصيد عادي على الرقم 01221599078.");return
   }
   const startVal=document.getElementById('examStart').value,endVal=document.getElementById('examEnd').value,subject=(document.getElementById('examSubject')?.value||'').trim()||'عام';
   const {data:exam,error}=await supabaseClient.from('exams').insert({teacher_id:currentUser.id,title,subject,duration_minutes:+document.getElementById('duration').value||10,target_grade:'all',published:true,start_at:startVal?new Date(startVal).toISOString():null,end_at:endVal?new Date(endVal).toISOString():null}).select().single();
@@ -369,7 +369,7 @@ function isAdmin(){return !!currentUser&&currentUser.role==='teacher'&&normalize
 async function teacherExamCount(){const start=new Date();start.setDate(1);start.setHours(0,0,0,0);const {data,error}=await supabaseClient.from('exam_creation_log').select('id').eq('teacher_id',currentUser.id).gte('created_at',start.toISOString());if(error){console.warn('teacherExamCount error',error);return 0}return (data||[]).length}
 async function getTeacherLimit(){if(isAdmin())return Infinity;const {data,error}=await supabaseClient.from('profiles').select('premium_until').eq('id',currentUser.id).single();if(error||!data)return 2;const active=data.premium_until&&new Date(data.premium_until)>new Date();return active?30:2}
 async function renderPlan(){const [count,limit]=await Promise.all([teacherExamCount(),getTeacherLimit()]);const limitLabel=limit===Infinity?'بلا حدود':limit;const planBox=document.getElementById('planInfo');if(planBox)planBox.innerHTML=`الحد الشهري الحالي: <b>${limitLabel}</b> امتحان${limit===Infinity?' (حساب الإدارة)':limit>2?' (باقة مدفوعة سارية)':' (باقة مجانية)'}.<br><small class="muted">للترقية، اضغط "عرض طريقة الترقية" ثم حوّل واستنى تفعيل الإدارة.</small>`;const monthBox=document.getElementById('monthlyExamInfo');if(monthBox)monthBox.innerHTML=limit===Infinity?`أنشأت <b>${count}</b> امتحان حتى الآن — لا يوجد حد شهري لحسابك.`:`أنشأت <b>${count}</b> من <b>${limit}</b> امتحانات هذا الشهر.${count>=limit?'<br><small style="color:#b91c1c">وصلت للحد الأقصى — رقّي باقتك لإضافة المزيد.</small>':''}`}
-function showPremiumInfo(){alert('للترقية إلى الباقة المميزة (حتى 30 امتحانًا شهريًا حتى نهاية الشهر):\n\n1) حوّل 50 جنيه على محفظة رقم 01147757094\n2) بعد التحويل، تواصل مع إدارة المنصة لتفعيل الترقية على حسابك.\n\nملحوظة: التفعيل يدوي من الإدارة بعد التأكد من التحويل.')}
+function showPremiumInfo(){alert('للترقية إلى الباقة المميزة (حتى 30 امتحانًا شهريًا حتى نهاية الشهر):\n\n1) حوّل 50 جنيه رصيد عادي (مش محفظة) على الرقم 01221599078\n2) بعد التحويل، تواصل مع إدارة المنصة لتفعيل الترقية على حسابك.\n\nملحوظة: التفعيل يدوي من الإدارة بعد التأكد من التحويل.')}
 async function activateTeacherPremium(id){const end=new Date();end.setMonth(end.getMonth()+1,0);end.setHours(23,59,59,999);const {error}=await supabaseClient.from('profiles').update({premium_until:end.toISOString()}).eq('id',id);if(error){alert('تعذر تفعيل الباقة: '+error.message);return}alert('✅ تم تفعيل الباقة المدفوعة (30 امتحان/شهر) حتى نهاية الشهر الحالي.');await renderPeople()}
 async function deactivateTeacherPremium(id){const {error}=await supabaseClient.from('profiles').update({premium_until:null}).eq('id',id);if(error){alert('تعذر إلغاء الباقة: '+error.message);return}alert('تم إلغاء الباقة المدفوعة لهذا المدرس.');await renderPeople()}
 async function deleteAccount(id,name){
@@ -648,7 +648,12 @@ async function deleteAttempt(attemptId){
   await renderTeacherGrading();
 }
 async function saveAttemptFeedback(attemptId){const ta=document.getElementById('advice_'+attemptId);const text=(ta?.value||'').trim();const {data,error}=await supabaseClient.from('exam_attempts').update({teacher_feedback:text||null}).eq('id',attemptId).select();if(error){alert('تعذر حفظ النصيحة: '+error.message);return}if(!data||!data.length){alert('⚠️ لم يتم حفظ النصيحة: قاعدة البيانات رفضت التعديل بصمت. تأكد من تشغيل صلاحية UPDATE على جدول exam_attempts.');return}alert('✅ تم حفظ النصيحة، وستظهر للطالب فورًا.')}
-let deferredPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e});async function installApp(){if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null}else alert('للتثبيت افتح قائمة Chrome واختر تثبيت التطبيق.')}
+let deferredPrompt=null;
+function isAppInstalled(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true}
+function updateInstallButtonVisibility(){const btn=document.getElementById('installBtn');if(!btn)return;btn.classList.toggle('hidden',isAppInstalled())}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;updateInstallButtonVisibility()});
+window.addEventListener('appinstalled',()=>{deferredPrompt=null;updateInstallButtonVisibility()});
+async function installApp(){if(deferredPrompt){deferredPrompt.prompt();const choice=await deferredPrompt.userChoice;deferredPrompt=null;if(choice?.outcome==='accepted')updateInstallButtonVisibility()}else if(isAppInstalled()){updateInstallButtonVisibility()}else alert('للتثبيت افتح قائمة المتصفح واختر "تثبيت التطبيق" أو "إضافة إلى الشاشة الرئيسية".')}
 setInterval(()=>{if(currentUser){touchPresence();renderMessages();renderPeople()}},30*1000);
 setInterval(()=>{if(currentUser)touchPresence()},5*60*1000);
 const VAPID_PUBLIC_KEY='BIaYbS4Akm0tfzi8sX_vzKcdMUR9H16M5ooIwGGWv3tinBl2RSDuKws9zZYw4Vf2i6wzVFPE_91H-izAtIq1tGA';
@@ -678,7 +683,7 @@ function typeBrand(){
     el.appendChild(s);
   });
 }
-async function init(){if('serviceWorker' in navigator){try{await navigator.serviceWorker.register('sw.js')}catch(e){console.warn('sw register failed',e)}}const {data:{session}}=await supabaseClient.auth.getSession();if(session){const {data:profile}=await supabaseClient.from('profiles').select('*').eq('id',session.user.id).maybeSingle();if(profile)currentUser={id:session.user.id,role:profile.role,name:profile.full_name,grade:profile.grade||'',email:session.user.email}}addQuestion();setLang('ar');typeBrand();setInterval(typeBrand,6000);await loadAnnouncement();if(currentUser){await renderDashboard();enablePushNotifications()}}
+async function init(){updateInstallButtonVisibility();if('serviceWorker' in navigator){try{await navigator.serviceWorker.register('sw.js')}catch(e){console.warn('sw register failed',e)}}const {data:{session}}=await supabaseClient.auth.getSession();if(session){const {data:profile}=await supabaseClient.from('profiles').select('*').eq('id',session.user.id).maybeSingle();if(profile)currentUser={id:session.user.id,role:profile.role,name:profile.full_name,grade:profile.grade||'',email:session.user.email}}addQuestion();setLang('ar');typeBrand();setInterval(typeBrand,6000);await loadAnnouncement();if(currentUser){await renderDashboard();enablePushNotifications()}}
 supabaseClient.auth.onAuthStateChange(async(_event,session)=>{if(!session)currentUser=null});init();
 </script>
 </body></html>

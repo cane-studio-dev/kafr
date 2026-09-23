@@ -150,7 +150,8 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);text-a
 <div class="cards" style="margin-top:18px"><div class="card"><h3>🎬 الدروس والفيديوهات</h3><div id="studentLessons" class="list">جارٍ التحميل...</div></div><div class="card"><h3>🏆 لوحة الصدارة</h3><div id="leaderboardStudent" class="list">جارٍ التحميل...</div></div></div>
 <div class="grid2" style="margin-top:18px"><div class="card"><h3>🔎 البحث عن درس أو امتحان</h3><div class="row"><input id="contentSearch" placeholder="ابحث عن درس أو امتحان..." title="اكتب كلمة من عنوان البوست أو الامتحان" onkeydown="if(event.key==='Enter')searchContent()"><button class="primary mini" type="button" title="يبحث في البوستات والامتحانات المعروضة عن الكلمة المكتوبة" onclick="searchContent()">بحث</button><button class="ghost mini" type="button" title="يمسح كلمة البحث ويعيد إظهار كل العناصر" onclick="clearContentSearch()">مسح</button></div><div id="contentSearchResult" class="list" style="margin-top:10px"></div><h3 style="margin-top:18px">👨‍🏫 المدرسون</h3><div id="teacherDirectory" class="directory"></div></div>
 <div class="card"><h3 data-i18n="privateMsg">المراسلة</h3><label data-i18n="choosePerson">اختر شخصًا للمراسلة</label><select id="msgPerson" title="اختر الطالب أو المدرس المستقبل للرسالة"><option value="">جارٍ تحميل قائمة المراسلين...</option></select><small class="muted" style="display:block;margin-top:6px">يمكنك اختيار أي طالب أو مدرس مسجل على المنصة.</small><textarea id="msgText" placeholder="اكتب رسالتك..." title="نص الرسالة الخاصة التي سترسلها"></textarea><div class="msg-tools"><label class="ghost mini" style="display:inline-block;margin:0" title="أرفق صورة أو ملفًا مع الرسالة (حتى 1 ميجابايت)">📎 إرفاق ملف<input id="studentMsgFile" type="file" hidden onchange="pickAttachment(this,'student')"></label><button class="ghost mini" type="button" title="يبدأ أو يوقف تسجيل رسالة صوتية لإرفاقها" onclick="toggleRecorder('student')">🎙️ تسجيل صوتي</button><button class="ghost mini" type="button" title="يلغي المرفق أو التسجيل الصوتي الحالي قبل الإرسال" onclick="clearAttachment('student')">إلغاء المرفق</button></div><small class="muted" style="display:block;margin-top:4px">📎 لإرفاق صورة أو ملف · 🎙️ لتسجيل رسالة صوتية · اضغط "إرسال" لإرسال الرسالة للشخص المختار أعلاه.</small><div id="studentAttachPreview" class="attach-preview hidden"></div><div id="studentAudioState" class="audio-bar"></div><button class="primary" title="يرسل الرسالة والمرفق (إن وجد) للشخص المختار" onclick="sendMessage('student')" data-i18n="send">إرسال</button><h3 data-i18n="sentMessages">رسائلي</h3><div class="row"><button class="ghost mini" title="يعرض كل الرسائل المرسلة والواردة" onclick="showMessageFilter('all')">الكل</button><button class="ghost mini" title="يعرض الرسائل الواردة فقط" onclick="showMessageFilter('received')">الواردة</button><button class="ghost mini" title="يعرض الرسائل التي أرسلتها أنت فقط" onclick="showMessageFilter('sent')">المرسلة</button></div><div id="studentMessages" class="list"></div></div></div></div>
-</section>
+
+</div></section>
 </main>
 <footer><div class="container">© 2026 Kafr El Hamadya Platform</div></footer>
 
@@ -185,6 +186,7 @@ const teachers=[
 {name:"استاذ احمد كمال",en:"Mr. Ahmed Kamal",aliases:["أستاذ أحمد كمال","استاذ أحمد كمال","أحمد كمال","ahmed kamal","mr ahmed kamal"]},
 {name:"استاذ احمد شوقي",en:"Mr. Ahmed Shawky",aliases:["أستاذ أحمد شوقي","استاذ أحمد شوقي","أحمد شوقي","ahmed shawky","mr ahmed shawky"]},
 {name:"أبله سعيده",en:"Ms. Saida",aliases:["أبله سعيده","أبله سعيدة","ابله سعيدة","سعيدة","ms saida","saida"]},
+{name:"أستاذ إسلام الهواري",en:"Mr. Islam El Hawary",aliases:["استاذ اسلام الهواري","أستاذ إسلام الهواري","إسلام الهواري","اسلام الهواري","islam el hawary","mr islam el hawary"]},
 {name:"المدرس التجريبي",en:"Demo Teacher",aliases:["مدرس تجريبي","demo teacher","test teacher"]}
 ];
 const grades=["الصف الأول الابتدائي","الصف الثاني الابتدائي","الصف الثالث الابتدائي","الصف الرابع الابتدائي","الصف الخامس الابتدائي","الصف السادس الابتدائي","الصف الأول الإعدادي","الصف الثاني الإعدادي","الصف الثالث الإعدادي"];
@@ -671,7 +673,6 @@ async function enablePushNotifications(){
 }
 function typeBrand(){
   const el=document.getElementById('brandType');if(!el)return;
-  const text='';
   const colors=['#ef4444','#f97316','#eab308','#22c55e','#06b6d4','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#f43f5e'];
   el.innerHTML='';
   [...text].forEach((ch,i)=>{
